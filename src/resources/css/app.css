@@ -1,0 +1,122 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+@import "tailwindcss";
+@import "../../vendor/livewire/flux/dist/flux.css";
+
+@source '../views';
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/*
+|--------------------------------------------------------------------------
+| Peta Formasi — Design Tokens (DESIGN.md §2)
+|--------------------------------------------------------------------------
+| Satu-satunya sumber nilai warna/font/radius proyek. Dilarang menulis
+| hex langsung di template Blade/Livewire; pakai kelas dari token ini.
+*/
+
+@theme {
+    --font-sans:
+        "Inter", ui-sans-system, system-ui, sans-serif, "Apple Color Emoji",
+        "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+
+    /* Basis netral (Stone) */
+    --color-canvas: #fafaf9;
+    --color-surface: #ffffff;
+    --color-sunken: #f5f5f4;
+    --color-line: #e7e5e4;
+    --color-line-strong: #d6d3d1;
+
+    /* Teks / tinta */
+    --color-ink: #1c1917;
+    --color-ink-2: #57534e;
+    --color-ink-3: #a8a29e;
+
+    /* Aksen tunggal (dipakai juga oleh komponen Flux starter kit) */
+    --color-accent: #2563eb;
+    --color-accent-hover: #1d4ed8;
+    --color-accent-soft: #eff6ff;
+    --color-accent-content: #1c1917;
+    --color-accent-foreground: #ffffff;
+
+    /* Semantik status */
+    --color-success: #15803d;
+    --color-success-soft: #f0fdf4;
+    --color-warning: #b45309;
+    --color-warning-soft: #fffbeb;
+    --color-danger: #b91c1c;
+    --color-danger-soft: #fef2f2;
+    --color-locked: #78716c;
+
+    /* Radius */
+    --radius-lg: 0.75rem;
+    --radius-xl: 1rem;
+    --radius-2xl: 1.25rem;
+
+    /* Shadow hanya untuk elemen melayang (DESIGN.md §2.3) */
+    --shadow-float:
+        0 1px 2px rgb(28 25 23 / 0.05), 0 8px 24px -8px rgb(28 25 23 / 0.1);
+}
+
+@layer theme {
+    /* Variabel Flux untuk mode gelap (halaman auth/settings starter kit) */
+    .dark {
+        --color-accent-content: #ffffff;
+        --color-accent-foreground: #1c1917;
+    }
+}
+
+@layer base {
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        @apply bg-canvas text-ink font-sans antialiased;
+    }
+
+    /* Angka statistik/kuota/rasio selalu sejajar (DESIGN.md §2.2) */
+    .tnum {
+        font-variant-numeric: tabular-nums;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+            transition-duration: 0.01ms !important;
+            animation-duration: 0.01ms !important;
+        }
+    }
+}
+
+@layer utilities {
+    /* Radius tombol diperbesar (revisi visual 14 Nov 2026): semua <button> dan
+       tautan bergaya tombol yang memakai rounded-lg memakai 16px — di tengah
+       antara 12px (terasa kaku) dan pill penuh (terlalu bulat).
+       Input/select/textarea TIDAK ikut — bentuknya tetap rounded-lg 12px.
+       Selektor elemen+kelas mengalahkan .rounded-lg bawaan dalam layer yang sama.
+       Mau lebih/kurang bulat? Ubah satu angka 1rem di bawah ini saja. */
+    a.rounded-lg,
+    button.rounded-lg {
+        border-radius: 1rem;
+    }
+}
+
+/* Lapisan identitas "Peta & Peluang" (DESIGN.md §12.1): tekstur kartografi
+   untuk tempat pajangan SAJA (hero landing, panel kepala Harga & Toolkit,
+   footer publik). Dilarang di belakang data (hasil Finder, isi detail, admin).
+   Garis kontur digambar sebagai SVG inline — warna tinta #1C1917 pada
+   opacity 5,5% yang sudah dibakar ke dalam berkasnya. */
+@utility bg-kontur {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='260' height='260' viewBox='0 0 260 260'%3E%3Cg fill='none' stroke='%231c1917' stroke-opacity='0.055' stroke-width='1.2'%3E%3Cpath d='M-20 45C40 15 95 75 155 45s105-25 145 5'/%3E%3Cpath d='M-20 85C40 55 95 115 155 85s105-25 145 5'/%3E%3Cpath d='M-20 125C40 95 95 155 155 125s105-25 145 5'/%3E%3Cpath d='M-20 165C40 135 95 195 155 165s105-25 145 5'/%3E%3Cpath d='M-20 205C40 175 95 235 155 205s105-25 145 5'/%3E%3Cpath d='M185 18c22-7 40 7 37 23s-22 25-40 18-19-34 3-41Z'/%3E%3Cpath d='M40 218c16-5 30 5 28 17s-17 19-30 13-14-25 2-30Z'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+@utility bg-titik {
+    background-image: radial-gradient(
+        circle,
+        rgb(28 25 23 / 0.09) 1.1px,
+        transparent 1.1px
+    );
+    background-size: 22px 22px;
+}
