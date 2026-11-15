@@ -31,6 +31,7 @@ Route::middleware(['auth', 'admin'])
         Route::get('/peserta', \App\Livewire\Admin\PesertaManager::class)->name('peserta');
         Route::get('/musim', \App\Livewire\Admin\MusimManager::class)->name('musim');
         Route::get('/pengaturan', \App\Livewire\Admin\PengaturanAkun::class)->name('pengaturan');
+        Route::get('/instansi', \App\Livewire\Admin\InstansiManager::class)->name('instansi');
     });
 
 Route::middleware(['auth', 'verified'])->group(function () {

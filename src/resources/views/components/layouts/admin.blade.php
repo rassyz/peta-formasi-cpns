@@ -16,6 +16,8 @@
              'ikon' => '<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/>'],
             ['pola' => 'admin.musim', 'url' => route('admin.musim'), 'label' => 'Musim',
              'ikon' => '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>'],
+            ['pola' => 'admin.instansi', 'url' => route('admin.instansi'), 'label' => 'Instansi',
+             'ikon' => '<path d="M3 22h18"/><path d="M6 18v-7"/><path d="M10 18v-7"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="m12 2-9 5h18l-9-5Z"/>'],
             ['pola' => 'admin.impor', 'url' => route('admin.impor'), 'label' => 'Impor Formasi',
              'ikon' => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/>'],
             ['pola' => 'admin.formasi', 'url' => route('admin.formasi'), 'label' => 'Kelola Formasi',
