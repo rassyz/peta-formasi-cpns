@@ -29,6 +29,7 @@ class ImporFormasi extends Component
 
     public ?int $instansiId = null;
 
+    /** @var \Livewire\Features\SupportFileUploads\TemporaryUploadedFile|null */
     public $berkas = null; // unggahan CSV
 
     public ?int $targetKuota = null; // total resmi dari pengumuman (gerbang checksum)
@@ -39,7 +40,6 @@ class ImporFormasi extends Component
     /** @var array<int, array<string, mixed>> baris yang lolos validasi & siap diterapkan */
     public array $barisSiap = [];
 
-    public string $pesan = '';
 
     public function mount(): void
     {
@@ -54,7 +54,6 @@ class ImporFormasi extends Component
 
     public function analisis(): void
     {
-        $this->pesan = '';
         $this->laporan = null;
         $this->barisSiap = [];
         $this->validate([
@@ -81,10 +80,10 @@ class ImporFormasi extends Component
         while (($kolom = fgetcsv($tangani, 0, $pembatas)) !== false) {
             $nomor++;
             if ($header === null) {
-                $header = array_map(fn ($h) => strtolower(trim($h)), $kolom);
+                $header = array_map(fn($h) => strtolower(trim($h)), $kolom);
                 continue;
             }
-            if (count(array_filter($kolom, fn ($v) => trim((string) $v) !== '')) === 0) {
+            if (count(array_filter($kolom, fn($v) => trim((string) $v) !== '')) === 0) {
                 continue; // baris kosong
             }
 
@@ -242,22 +241,22 @@ class ImporFormasi extends Component
             );
         }
 
-        $this->pesan = 'Jurusan yang hilang sudah ditambahkan ke master. Analisis dijalankan ulang.';
+        $this->dispatch('toast', tipe: 'sukses', pesan: 'Jurusan yang hilang sudah ditambahkan ke master. Analisis dijalankan ulang.');
         $this->analisis();
     }
 
     public function terapkan(): void
     {
         if ($this->laporan === null || ! $this->laporan['valid'] || $this->barisSiap === []) {
-            $this->pesan = 'Belum ada baris valid yang bisa diterapkan — perbaiki berkas dulu.';
+            $this->dispatch('toast', tipe: 'peringatan', pesan: 'Belum ada baris valid yang bisa diterapkan — perbaiki berkas dulu.');
             return;
         }
         // Gerbang checksum: target terisi tapi tidak cocok -> penerapan DIBLOKIR.
         if ($this->laporan['checksum_ok'] === false) {
-            $this->pesan = 'Checksum tidak cocok: total kuota berkas '
+            $this->dispatch('toast', tipe: 'galat', pesan: 'Checksum tidak cocok: total kuota berkas '
                 . number_format($this->laporan['total_kuota_file'], 0, ',', '.')
                 . ' vs target resmi ' . number_format($this->laporan['target_kuota'], 0, ',', '.')
-                . '. Penerapan diblokir — periksa kembali ekstraksi datanya (PRD §10).';
+                . '. Penerapan diblokir — periksa kembali ekstraksi datanya (PRD §10).');
             return;
         }
 
@@ -303,7 +302,7 @@ class ImporFormasi extends Component
         });
 
         $jumlah = count($this->barisSiap);
-        $this->pesan = $jumlah . ' formasi diterapkan sebagai DRAFT. Terbitkan dari halaman Kelola Formasi setelah diperiksa.';
+        $this->dispatch('toast', tipe: 'sukses', pesan: $jumlah . ' formasi diterapkan sebagai DRAFT. Terbitkan dari halaman Kelola Formasi setelah diperiksa.');
         $this->laporan = null;
         $this->barisSiap = [];
         $this->berkas = null;

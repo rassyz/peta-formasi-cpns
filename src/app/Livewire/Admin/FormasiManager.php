@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Admin\Concerns\KonfirmasiAksi;
 use App\Models\Formasi;
 use App\Models\Instansi;
 use App\Models\Musim;
@@ -20,6 +21,7 @@ use Livewire\WithPagination;
 class FormasiManager extends Component
 {
     use WithPagination;
+    use KonfirmasiAksi;
 
     public ?int $musimId = null;
 
@@ -30,7 +32,6 @@ class FormasiManager extends Component
     /** Pencarian teks nama formasi (jabatan/penempatan/instansi) pada daftar. */
     public string $cariFormasi = '';
 
-    public string $pesan = '';
 
     // --- Panel snapshot manual ---
     public string $snapshotFormasiId = '';
@@ -63,24 +64,24 @@ class FormasiManager extends Component
     public function terbitkan(int $id): void
     {
         Formasi::query()->whereKey($id)->update(['status_terbit' => 'terbit']);
-        $this->pesan = 'Formasi diterbitkan.';
+        $this->dispatch('toast', tipe: 'sukses', pesan: 'Formasi diterbitkan.');
     }
 
     public function tarik(int $id): void
     {
         Formasi::query()->whereKey($id)->update(['status_terbit' => 'draft']);
-        $this->pesan = 'Formasi ditarik kembali ke draft.';
+        $this->dispatch('toast', tipe: 'sukses', pesan: 'Formasi ditarik kembali ke draft.');
     }
 
     public function hapus(int $id): void
     {
         $formasi = Formasi::query()->findOrFail($id);
         if ($formasi->status_terbit !== 'draft') {
-            $this->pesan = 'Hanya formasi draft yang bisa dihapus. Tarik dulu bila sudah terbit.';
+            $this->dispatch('toast', tipe: 'peringatan', pesan: 'Hanya formasi draft yang bisa dihapus. Tarik dulu bila sudah terbit.');
             return;
         }
         $formasi->delete();
-        $this->pesan = 'Formasi draft dihapus.';
+        $this->dispatch('toast', tipe: 'sukses', pesan: 'Formasi draft dihapus.');
     }
 
     public function terbitkanSemuaDraft(): void
@@ -90,7 +91,7 @@ class FormasiManager extends Component
             ->when($this->instansiId !== '', fn($q) => $q->where('instansi_id', (int) $this->instansiId))
             ->where('status_terbit', 'draft')
             ->update(['status_terbit' => 'terbit']);
-        $this->pesan = $jumlah . ' formasi draft diterbitkan.';
+        $this->dispatch('toast', tipe: 'sukses', pesan: $jumlah . ' formasi draft diterbitkan.');
     }
 
     public function toggleContoh(int $id): void
@@ -99,7 +100,7 @@ class FormasiManager extends Component
 
         if ($formasi->kartu_contoh) {
             $formasi->update(['kartu_contoh' => false]);
-            $this->pesan = 'Tanda kartu contoh dicabut dari "' . $formasi->jabatan . '".';
+            $this->dispatch('toast', tipe: 'sukses', pesan: 'Tanda kartu contoh dicabut dari "' . $formasi->jabatan . '".');
             return;
         }
 
@@ -112,13 +113,13 @@ class FormasiManager extends Component
                 ->whereHas('jurusan', fn($q) => $q->where('jurusan.id', $jurusan->id))
                 ->count();
             if ($jumlah >= 3) {
-                $this->pesan = 'Jurusan ' . $jurusan->labelLengkap() . ' sudah punya 3 kartu contoh pada musim ini (batas FR-A8). Cabut salah satu dulu.';
+                $this->dispatch('toast', tipe: 'peringatan', pesan: 'Jurusan ' . $jurusan->labelLengkap() . ' sudah punya 3 kartu contoh pada musim ini (batas FR-A8). Cabut salah satu dulu.');
                 return;
             }
         }
 
         $formasi->update(['kartu_contoh' => true]);
-        $this->pesan = '"' . $formasi->jabatan . '" ditandai sebagai kartu contoh — detailnya terbuka untuk semua pengunjung.';
+        $this->dispatch('toast', tipe: 'sukses', pesan: '"' . $formasi->jabatan . '" ditandai sebagai kartu contoh — detailnya terbuka untuk semua pengunjung.');
     }
 
     public function simpanSnapshot(): void
@@ -137,7 +138,7 @@ class FormasiManager extends Component
         $kuota = $formasi->kuota->firstWhere('jenis_kebutuhan', $this->snapshotJenis);
 
         if ($kuota === null) {
-            $this->pesan = 'Formasi itu tidak punya kuota jenis "' . $this->snapshotJenis . '".';
+            $this->dispatch('toast', tipe: 'peringatan', pesan: 'Formasi itu tidak punya kuota jenis "' . $this->snapshotJenis . '".');
             return;
         }
 
@@ -149,7 +150,7 @@ class FormasiManager extends Component
             'sumber' => $this->snapshotSumber !== '' ? $this->snapshotSumber : null,
         ]);
 
-        $this->pesan = 'Snapshot tersimpan untuk ' . $formasi->jabatan . ' (' . $this->snapshotJenis . ').';
+        $this->dispatch('toast', tipe: 'sukses', pesan: 'Snapshot tersimpan untuk ' . $formasi->jabatan . ' (' . $this->snapshotJenis . ').');
     }
 
     public function render()

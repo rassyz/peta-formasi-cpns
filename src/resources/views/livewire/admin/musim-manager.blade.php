@@ -17,13 +17,6 @@
         @endunless
     </div>
 
-    @if ($pesan)
-        <p class="mt-4 rounded-lg bg-success-soft px-3.5 py-2.5 text-sm text-success">{{ $pesan }}</p>
-    @endif
-    @if ($galat)
-        <p class="mt-4 rounded-lg bg-danger-soft px-3.5 py-2.5 text-sm text-danger">{{ $galat }}</p>
-    @endif
-
     {{-- Form buat/edit --}}
     @if ($tampilForm)
         <form wire:submit="simpan" class="mt-6 rounded-xl border border-line bg-surface p-5">
@@ -121,13 +114,13 @@
                     </button>
                     @if (isset($langkah[$m->status]))
                         @php [$ke, $teks, $konfirmasi] = $langkah[$m->status]; @endphp
-                        <button type="button" wire:click="transisi({{ $m->id }}, '{{ $ke }}')" wire:confirm="{{ $konfirmasi }}"
+                        <button type="button" wire:click="mintaKonfirmasi('transisi', [{{ $m->id }}, '{{ $ke }}'], 'Ubah status musim?', '{{ $konfirmasi }}', false, '{{ $teks }}')"
                             class="inline-flex h-9 items-center rounded-lg border border-line-strong px-3.5 text-sm font-medium transition-colors hover:bg-sunken">
                             {{ $teks }}
                         </button>
                     @endif
                     @if ($m->status === 'dibuat')
-                        <button type="button" wire:click="hapus({{ $m->id }})" wire:confirm="Hapus musim {{ $m->label }}? Hanya bisa bila musim ini belum memiliki data apa pun."
+                        <button type="button" wire:click="mintaKonfirmasi('hapus', [{{ $m->id }}], 'Hapus musim?', 'Hapus musim {{ $m->label }}? Hanya bisa bila musim ini belum memiliki data apa pun.', true, 'Ya, hapus')"
                             class="inline-flex h-9 items-center rounded-lg border border-line-strong px-3.5 text-sm font-medium text-danger transition-colors hover:bg-danger-soft">
                             Hapus
                         </button>
@@ -138,4 +131,6 @@
             <p class="px-5 py-10 text-center text-ink-2">Belum ada musim terdaftar.</p>
         @endforelse
     </div>
+
+    @include('livewire.admin._modal-konfirmasi')
 </div>

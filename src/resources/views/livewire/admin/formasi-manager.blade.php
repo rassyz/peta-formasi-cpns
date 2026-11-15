@@ -4,10 +4,6 @@
         Terbitkan atau tarik formasi, tandai kartu contoh (maks 3 per jurusan), dan catat snapshot pelamar manual.
     </p>
 
-    @if ($pesan)
-        <p class="mt-4 rounded-lg bg-success-soft px-3.5 py-2.5 text-sm text-success">{{ $pesan }}</p>
-    @endif
-
     {{-- Filter --}}
     <div class="mt-6 flex flex-wrap items-center gap-2">
         <div class="relative min-w-56 flex-1 sm:max-w-xs">
@@ -37,7 +33,7 @@
             <option value="draft">Draft</option>
             <option value="terbit">Terbit</option>
         </select>
-        <button type="button" wire:click="terbitkanSemuaDraft" wire:confirm="Terbitkan semua formasi draft pada saringan ini?"
+        <button type="button" wire:click="mintaKonfirmasi('terbitkanSemuaDraft', [], 'Terbitkan semua draft?', 'Terbitkan semua formasi draft pada saringan ini? Formasi yang terbit langsung tampil ke publik.', false, 'Ya, terbitkan')"
             class="ml-auto inline-flex h-10 items-center rounded-lg bg-ink px-4 text-sm font-medium text-white transition-colors hover:bg-stone-800">
             Terbitkan Semua Draft
         </button>
@@ -85,7 +81,7 @@
                             <div class="flex flex-wrap gap-x-3 gap-y-1 whitespace-nowrap">
                                 @if ($f->status_terbit === 'draft')
                                     <button type="button" wire:click="terbitkan({{ $f->id }})" class="font-medium text-accent hover:underline">Terbitkan</button>
-                                    <button type="button" wire:click="hapus({{ $f->id }})" wire:confirm="Hapus formasi draft ini beserta kuota & kualifikasinya?" class="font-medium text-danger hover:underline">Hapus</button>
+                                    <button type="button" wire:click="mintaKonfirmasi('hapus', [{{ $f->id }}], 'Hapus formasi draft?', 'Hapus formasi draft ini beserta kuota & kualifikasinya? Tindakan ini tidak bisa dibatalkan.', true, 'Ya, hapus')" class="font-medium text-danger hover:underline">Hapus</button>
                                 @else
                                     <button type="button" wire:click="tarik({{ $f->id }})" class="font-medium text-accent hover:underline">Tarik</button>
                                 @endif
@@ -174,4 +170,6 @@
             </div>
         @endif
     </section>
+
+    @include('livewire.admin._modal-konfirmasi')
 </div>

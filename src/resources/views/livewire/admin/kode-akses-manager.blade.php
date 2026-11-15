@@ -4,10 +4,6 @@
         Buat batch kode untuk dijual lewat Lynk.id, pantau mana yang sudah terpakai, dan cabut kode yang belum terpakai bila perlu.
     </p>
 
-    @if ($pesan)
-        <p class="mt-4 rounded-lg bg-success-soft px-3.5 py-2.5 text-sm text-success">{{ $pesan }}</p>
-    @endif
-
     {{-- Form buat batch --}}
     <form wire:submit="buatBatch" class="mt-6 rounded-2xl border border-line bg-surface p-5 sm:p-6">
         <h2 class="font-semibold">Buat batch baru</h2>
@@ -95,8 +91,8 @@
                         </td>
                         <td class="px-4 py-3 text-right">
                             @if ($kode->status === 'belum_dipakai')
-                                <button type="button" wire:click="cabut({{ $kode->id }})" wire:confirm="Cabut kode {{ $kode->kode }}? Kode tidak bisa di-redeem lagi."
-                                    class="text-sm font-medium text-danger hover:underline">Cabut</button>
+                                <button type="button" wire:click="mintaKonfirmasi('cabut', [{{ $kode->id }}], 'Cabut kode akses?', 'Cabut kode {{ $kode->kode }}? Kode tidak bisa di-redeem lagi.', true, 'Ya, cabut kode')"
+                                    class="inline-flex h-8 items-center rounded-lg border border-danger/40 px-3 text-[13px] font-medium text-danger transition-colors hover:border-danger/60 hover:bg-danger-soft">Cabut</button>
                             @endif
                         </td>
                     </tr>
@@ -108,4 +104,6 @@
     </div>
 
     <div class="mt-4">{{ $daftar->links() }}</div>
+
+    @include('livewire.admin._modal-konfirmasi')
 </div>

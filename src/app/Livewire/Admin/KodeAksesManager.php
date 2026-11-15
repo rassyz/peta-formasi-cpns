@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Livewire\Admin\Concerns\KonfirmasiAksi;
 use App\Models\KodeAkses;
 use App\Models\Musim;
 use Illuminate\Support\Str;
@@ -19,6 +20,7 @@ use Livewire\WithPagination;
 class KodeAksesManager extends Component
 {
     use WithPagination;
+    use KonfirmasiAksi;
 
     public ?int $musimId = null;
 
@@ -30,7 +32,6 @@ class KodeAksesManager extends Component
 
     public string $saringStatus = '';
 
-    public string $pesan = '';
 
     protected function rules(): array
     {
@@ -71,8 +72,8 @@ class KodeAksesManager extends Component
             $dibuat++;
         }
 
-        $this->pesan = $dibuat . ' kode ' . ($this->tipe === 'strategi' ? 'Pass Strategi' : 'Pass Peta Historis')
-            . ' untuk ' . $musim->label . ' dibuat pada batch "' . $namaBatch . '". Salin dari tabel di bawah untuk dikirim ke pembeli Lynk.id.';
+        $this->dispatch('toast', tipe: 'sukses', pesan: $dibuat . ' kode ' . ($this->tipe === 'strategi' ? 'Pass Strategi' : 'Pass Peta Historis')
+            . ' untuk ' . $musim->label . ' dibuat pada batch "' . $namaBatch . '". Salin dari tabel di bawah untuk dikirim ke pembeli Lynk.id.');
         $this->resetPage();
     }
 
@@ -82,7 +83,7 @@ class KodeAksesManager extends Component
 
         if ($kode->status === 'belum_dipakai') {
             $kode->update(['status' => 'dicabut']);
-            $this->pesan = 'Kode ' . $kode->kode . ' dicabut — tidak bisa di-redeem lagi.';
+            $this->dispatch('toast', tipe: 'sukses', pesan: 'Kode ' . $kode->kode . ' dicabut — tidak bisa di-redeem lagi.');
         }
     }
 

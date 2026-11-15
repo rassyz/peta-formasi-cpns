@@ -29,6 +29,7 @@ Route::middleware(['auth', 'admin'])
         Route::livewire('/formasi', App\Livewire\Admin\FormasiManager::class)->name('formasi');
         Route::get('/peserta', \App\Livewire\Admin\PesertaManager::class)->name('peserta');
         Route::get('/musim', \App\Livewire\Admin\MusimManager::class)->name('musim');
+        Route::get('/pengaturan', \App\Livewire\Admin\PengaturanAkun::class)->name('pengaturan');
     });
 
 Route::middleware(['auth', 'verified'])->group(function () {

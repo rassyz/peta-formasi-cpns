@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Peta Formasi CPNS</title>
+    <title>{{ $title ?? 'Admin — Peta Formasi' }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 </head>
@@ -55,6 +55,10 @@
                     <p class="truncate text-sm font-medium text-ink">{{ auth()->user()?->name }}</p>
                     <p class="truncate text-[13px] text-ink-3">{{ auth()->user()?->email }}</p>
                 </div>
+                <a href="{{ route('admin.pengaturan') }}" class="{{ $kelasNav(request()->routeIs('admin.pengaturan')) }}">
+                    <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    Pengaturan Akun
+                </a>
                 <a href="{{ url('/') }}" class="{{ $kelasNav(false) }}">
                     <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
                     Lihat Situs
@@ -97,6 +101,7 @@
                         @endforeach
                     </nav>
                     <div class="mt-3 flex flex-col gap-2 border-t border-line pt-3">
+                        <a href="{{ route('admin.pengaturan') }}" class="inline-flex h-11 items-center justify-center rounded-lg border border-line-strong px-5 text-sm font-medium transition-colors hover:bg-sunken">Pengaturan Akun</a>
                         <a href="{{ url('/') }}" class="inline-flex h-11 items-center justify-center rounded-lg border border-line-strong px-5 text-sm font-medium transition-colors hover:bg-sunken">Lihat Situs</a>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
@@ -115,6 +120,46 @@
                 <p class="text-[13px] text-ink-3">Panel admin PetaFormasi — seluruh data bersumber dari pengumuman resmi instansi.</p>
             </footer>
         </div>
+    </div>
+
+    {{-- Sistem toast admin (15 Nov 2026): komponen Livewire memancarkan
+         $this->dispatch('toast', tipe: 'sukses|galat|peringatan', pesan: '...')
+         dan wadah ini menampilkannya melayang — terlihat dari posisi scroll
+         mana pun, hilang sendiri setelah 5 detik, bisa ditutup manual. --}}
+    <div x-data="{
+            daftar: [],
+            berikut: 1,
+            tambah(e) {
+                const id = this.berikut++;
+                this.daftar.push({ id, tipe: e.detail.tipe ?? 'sukses', pesan: e.detail.pesan ?? '' });
+                setTimeout(() => this.hapus(id), 5000);
+            },
+            hapus(id) { this.daftar = this.daftar.filter((t) => t.id !== id); },
+         }"
+        @toast.window="tambah($event)"
+        class="pointer-events-none fixed inset-x-3 top-3 z-100 flex flex-col gap-2 sm:inset-x-auto sm:right-4 sm:top-4 sm:w-96"
+        aria-live="polite">
+        <template x-for="t in daftar" :key="t.id">
+            <div x-transition:enter="transition duration-300 ease-out"
+                 x-transition:enter-start="translate-x-4 opacity-0"
+                 x-transition:enter-end="translate-x-0 opacity-100"
+                 x-transition:leave="transition duration-200 ease-in"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="pointer-events-auto flex items-start gap-3 rounded-xl border border-line bg-surface p-4 shadow-float">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                      :class="t.tipe === 'galat' ? 'bg-danger-soft text-danger' : (t.tipe === 'peringatan' ? 'bg-warning-soft text-warning' : 'bg-success-soft text-success')">
+                    <svg x-show="t.tipe === 'sukses'" class="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                    <svg x-show="t.tipe === 'galat'" class="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    <svg x-show="t.tipe === 'peringatan'" class="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3ZM12 9v4M12 17h.01"/></svg>
+                </span>
+                <p class="min-w-0 flex-1 pt-1.5 text-sm leading-5 text-ink" x-text="t.pesan"></p>
+                <button type="button" @click="hapus(t.id)" aria-label="Tutup notifikasi"
+                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-sunken hover:text-ink">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </template>
     </div>
 
     @livewireScripts

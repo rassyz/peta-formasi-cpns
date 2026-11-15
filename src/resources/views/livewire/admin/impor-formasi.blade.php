@@ -6,10 +6,6 @@
         resmi pengumuman sebelum apa pun diterapkan — hasil impor selalu masuk sebagai <span class="font-medium text-ink">draft</span>.
     </p>
 
-    @if ($pesan)
-        <p class="mt-4 rounded-lg bg-success-soft px-3.5 py-2.5 text-sm text-success">{{ $pesan }}</p>
-    @endif
-
     <form wire:submit="analisis" class="mt-6 rounded-2xl border border-line bg-surface p-5 sm:p-6">
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
