@@ -143,9 +143,17 @@ const targetSah = [200, 500, 1024].includes(targetUrl) ? targetUrl : null;
 
 let filePdf = null;
 
-const pemilihPdf = buatPemilihPreset(".preset-pdf", targetSah ?? 500, () => {
-    $("pdf-custom").value = "";
-});
+const pemilihPdf = buatPemilihPreset(
+    ".preset-pdf",
+    targetSah ?? 500,
+    (nilai) => {
+        // Kosongkan isian bebas hanya bila yang dipilih chip preset asli.
+        // set(-1) dari isian bebas TIDAK boleh mengosongkan kotak yang sedang diketik.
+        if (nilai > 0) {
+            $("pdf-custom").value = "";
+        }
+    },
+);
 
 $("pdf-custom").addEventListener("input", (e) => {
     const v = Number(e.target.value);
@@ -156,7 +164,8 @@ $("pdf-custom").addEventListener("input", (e) => {
 
 const targetPdfKb = () => {
     const custom = Number($("pdf-custom").value);
-    return custom > 0 ? custom : pemilihPdf.nilai;
+    if (custom > 0) return custom;
+    return pemilihPdf.nilai > 0 ? pemilihPdf.nilai : 500;
 };
 
 pasangPemilihFile(
