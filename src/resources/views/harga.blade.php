@@ -2,16 +2,9 @@
     <x-slot:title>Harga Pass — Peta Formasi</x-slot:title>
 
     <div class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        <div class="rounded-2xl bg-kontur p-6 sm:p-8">
-            <div class="max-w-2xl">
-                <h1 class="text-3xl font-bold tracking-tight">Harga Pass</h1>
-                <p class="mt-3 leading-7 text-ink-2">
-                    Semua fungsi pencarian formasi <span class="font-medium text-ink">gratis</span> — pass hanya membuka
-                    isi detailnya. Sekali bayar per musim, tanpa langganan, tanpa perpanjangan otomatis.
-                    Masa berlaku tiap pass tertulis di kartunya, sebelum kamu membeli.
-                </p>
-            </div>
-        </div>
+        <x-ui.kepala-halaman judul="Harga Pass" varian="kontur">
+            Semua fungsi pencarian formasi <span class="font-medium text-ink">gratis</span> — pass hanya membuka isi detailnya. Sekali bayar per musim, tanpa langganan, tanpa perpanjangan otomatis. Masa berlaku tiap pass tertulis di kartunya, sebelum kamu membeli.
+        </x-ui.kepala-halaman>
 
         <div class="mt-8 grid gap-4 lg:grid-cols-3">
             {{-- Pass Historis --}}

@@ -1,11 +1,8 @@
-<div class="mx-auto max-w-7xl px-4 pt-8 pb-24 sm:px-6 lg:px-8 lg:pb-8">
-    {{-- Kepala Finder --}}
-    <div class="border-b border-line pb-5">
-        <h1 class="text-2xl font-bold tracking-tight sm:text-3xl">Cari Formasi</h1>
-        <p class="mt-1.5 text-[15px] text-ink-2">
-            Semua fungsi daftar ini gratis — telusuri formasinya, lalu persempit menurut jurusanmu.
-        </p>
-    </div>
+<div class="mx-auto max-w-7xl px-4 pt-10 pb-24 sm:px-6 lg:px-8 lg:pb-8">
+    {{-- Kepala Finder — rangka bersama (x-ui.kepala-halaman), varian polos --}}
+    <x-ui.kepala-halaman judul="Cari Formasi" varian="polos">
+        Semua fungsi daftar ini <span class="font-medium text-ink">gratis</span> — telusuri formasinya, lalu persempit menurut jurusanmu.
+    </x-ui.kepala-halaman>
 
     <div x-data="{ filterTerbuka: false }">
         {{-- Backdrop bottom sheet filter (mobile saja) --}}

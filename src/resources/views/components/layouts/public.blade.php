@@ -21,9 +21,9 @@
                 </a>
 
                 <nav class="hidden md:flex items-center gap-1 text-[15px]">
-                    <a href="{{ url('/formasi') }}" class="rounded-lg px-3 py-2 text-ink-2 hover:bg-sunken hover:text-ink transition-colors">Cari Formasi</a>
-                    <a href="{{ url('/toolkit') }}" class="rounded-lg px-3 py-2 text-ink-2 hover:bg-sunken hover:text-ink transition-colors">Toolkit Berkas</a>
-                    <a href="{{ url('/harga') }}" class="rounded-lg px-3 py-2 text-ink-2 hover:bg-sunken hover:text-ink transition-colors">Harga Pass</a>
+                    <a href="{{ url('/formasi') }}" class="rounded-lg px-3 py-2 transition-colors {{ request()->routeIs('formasi.*') || request()->routeIs('jurusan.*') ? 'bg-sunken font-semibold text-ink' : 'text-ink-2 hover:bg-sunken hover:text-ink' }}">Cari Formasi</a>
+                    <a href="{{ url('/toolkit') }}" class="rounded-lg px-3 py-2 transition-colors {{ request()->routeIs('toolkit') ? 'bg-sunken font-semibold text-ink' : 'text-ink-2 hover:bg-sunken hover:text-ink' }}">Toolkit Berkas</a>
+                    <a href="{{ url('/harga') }}" class="rounded-lg px-3 py-2 transition-colors {{ request()->routeIs('harga') ? 'bg-sunken font-semibold text-ink' : 'text-ink-2 hover:bg-sunken hover:text-ink' }}">Harga Pass</a>
                 </nav>
 
                 {{-- Aksi desktop (sm ke atas): nav lengkap + Masuk/Daftar --}}
@@ -84,7 +84,7 @@
                 </div>
 
                 {{-- Aksi mobile: tombol burger — membuka panel menu di bawah header --}}
-                <div class="flex items-center sm:hidden">
+                <div class="flex items-center md:hidden">
                     <button type="button" @click="menuTerbuka = ! menuTerbuka" :aria-expanded="menuTerbuka" aria-label="Buka atau tutup menu navigasi"
                         class="inline-flex h-10 w-10 items-center justify-center rounded-lg text-ink transition-colors hover:bg-sunken">
                         <svg x-show="! menuTerbuka" class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
@@ -94,7 +94,7 @@
             </div>
 
             {{-- Panel menu mobile (pola referensi SSCASN): tautan bertumpuk + tombol akun --}}
-            <div x-show="menuTerbuka" x-cloak class="pb-4 sm:hidden">
+            <div x-show="menuTerbuka" x-cloak class="pb-4 md:hidden">
                 @php
                     $kelasItem = fn (bool $aktif) => $aktif
                         ? 'rounded-lg bg-sunken px-3.5 py-2.5 font-semibold text-ink'
@@ -106,7 +106,7 @@
                     <a href="{{ url('/toolkit') }}" class="{{ $kelasItem(request()->routeIs('toolkit')) }}">Toolkit Berkas</a>
                     <a href="{{ url('/harga') }}" class="{{ $kelasItem(request()->routeIs('harga')) }}">Harga Pass</a>
                 </nav>
-                <div class="mt-3 flex flex-col gap-2 border-t border-line pt-4">
+                <div class="mt-3 flex flex-col gap-2 border-t border-line pt-4 sm:hidden">
                     @auth
                         {{-- Blok akun panel mobile (15 Nov 2026): identitas + baris menu,
                              sepasang dengan dropdown akun di desktop. --}}

@@ -2,16 +2,9 @@
     <x-slot:title>Toolkit Berkas — Peta Formasi</x-slot:title>
 
     <div id="toolkit-root" class="mx-auto max-w-6xl px-4 py-10 sm:px-6 lg:px-8">
-        <div class="rounded-2xl bg-titik p-6 sm:p-8">
-            <div class="max-w-2xl">
-                <h1 class="text-3xl font-bold tracking-tight">Toolkit Berkas</h1>
-                <p class="mt-3 leading-7 text-ink-2">
-                    Kompres PDF dan foto ke ukuran unggah yang disyaratkan instansi, langsung di browser kamu.
-                    <span class="font-medium text-ink">File tidak pernah diunggah ke server</span> — semua proses
-                    berjalan di perangkatmu dan file asli tidak berubah.
-                </p>
-            </div>
-        </div>
+        <x-ui.kepala-halaman judul="Toolkit Berkas" varian="titik">
+            Kompres PDF dan foto ke ukuran unggah yang disyaratkan instansi, langsung di browser kamu. <span class="font-medium text-ink">File tidak pernah diunggah ke server</span> — semua proses berjalan di perangkatmu dan file asli tidak berubah.
+        </x-ui.kepala-halaman>
 
         <div class="mt-8 grid gap-6 lg:grid-cols-2">
             {{-- ================= Kompres PDF ================= --}}
