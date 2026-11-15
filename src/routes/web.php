@@ -16,6 +16,7 @@ Route::get('/formasi', Finder::class)->name('formasi.index');
 Route::get('/formasi/{slug}', [FormasiController::class, 'show'])->name('formasi.show');
 Route::get('/jurusan/{slug}', [FormasiController::class, 'jurusan'])->name('jurusan.show');
 Route::view('/harga', 'harga')->name('harga');
+Route::view('/sampai-jumpa', 'sampai-jumpa')->name('sampai-jumpa');
 
 
 Route::middleware(['auth', 'admin'])
@@ -43,6 +44,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware('auth')->prefix('akun')->name('akun.')->group(function () {
     Route::get('/pass', [AkunController::class, 'pass'])->name('pass');
     Route::get('/redeem', RedeemForm::class)->name('redeem');
+    Route::get('/pengaturan', \App\Livewire\Akun\Pengaturan::class)->name('pengaturan');
 });
 
 require __DIR__ . '/settings.php';

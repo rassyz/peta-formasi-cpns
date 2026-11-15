@@ -29,20 +29,50 @@
                 {{-- Aksi desktop (sm ke atas): nav lengkap + Masuk/Daftar --}}
                 <div class="hidden items-center gap-2 sm:flex">
                     @auth
-                        @if (auth()->user()->isAdmin())
-                            <a href="{{ url('/admin') }}" class="inline-flex h-10 items-center gap-2 rounded-lg bg-ink px-4 text-sm font-medium text-white hover:bg-stone-800 transition-colors">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg> Panel Admin
-                            </a>
-                        @endif
+                        {{-- Menu akun (15 Nov 2026): avatar inisial membuka dropdown berisi
+                             identitas + halaman akun + Keluar — menggantikan tombol
+                             Pass Saya / Panel Admin / Keluar yang dulu berjajar. --}}
                         @if (! auth()->user()->isAdmin())
+                            {{-- Pass Saya SENGAJA di luar menu (15 Nov 2026): ia "lemari
+                                 barang yang sudah dibayar" — halaman akun tersering
+                                 dikunjungi peserta, harus satu klik & selalu terlihat. --}}
                             <a href="{{ route('akun.pass') }}" class="inline-flex h-10 items-center gap-2 rounded-lg border border-line-strong px-4 text-sm font-medium transition-colors hover:bg-sunken"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 11v2"/><path d="M13 17v2"/></svg>Pass Saya</a>
                         @endif
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
-                            <button type="submit" class="inline-flex h-10 items-center gap-2 rounded-lg bg-ink px-4 text-sm font-medium text-white transition-colors hover:bg-stone-800">
-                                <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg> Keluar
+                        <div class="relative" x-data="{ menuAkun: false }">
+                            <button type="button" @click="menuAkun = ! menuAkun" :aria-expanded="menuAkun" aria-haspopup="true" aria-label="Buka menu akun"
+                                class="flex h-10 items-center gap-2 rounded-full border border-line-strong py-1 pl-1 pr-4 transition-colors hover:bg-sunken">
+                                <span class="flex h-8 w-8 items-center justify-center rounded-full bg-accent-soft text-[13px] font-semibold text-accent">{{ auth()->user()->inisial() }}</span>
+                                <span class="hidden max-w-44 truncate text-sm font-medium xl:block">{{ auth()->user()->name }}</span>
                             </button>
-                        </form>
+                            <div x-show="menuAkun" x-cloak @click.away="menuAkun = false" @keydown.escape.window="menuAkun = false"
+                                x-transition:enter="transition duration-150 ease-out" x-transition:enter-start="scale-95 opacity-0" x-transition:enter-end="scale-100 opacity-100"
+                                class="absolute right-0 top-full z-50 mt-2 w-72 origin-top-right rounded-2xl border border-line bg-surface py-2 shadow-float">
+                                <div class="flex items-center gap-3 border-b border-line px-4 pb-3 pt-2">
+                                    <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent-soft text-base font-semibold text-accent">{{ auth()->user()->inisial() }}</span>
+                                    <div class="min-w-0">
+                                        <p class="truncate text-sm font-semibold">{{ auth()->user()->name }}</p>
+                                        <p class="truncate text-[13px] text-ink-3">{{ auth()->user()->email }}</p>
+                                    </div>
+                                </div>
+                                <nav class="py-1.5">
+                                    @if (auth()->user()->isAdmin())
+                                        <a href="{{ url('/admin') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-sunken"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Panel Admin</a>
+                                        <a href="{{ route('admin.pengaturan') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-sunken"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Pengaturan Akun</a>
+                                    @else
+                                        <a href="{{ route('akun.redeem') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-sunken"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>Redeem Kode</a>
+                                        <a href="{{ route('akun.pengaturan') }}" class="flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-sunken"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Pengaturan</a>
+                                    @endif
+                                </nav>
+                                <div class="border-t border-line pt-1.5">
+                                    <form method="POST" action="{{ route('logout') }}" x-data="{ keluar: false }" @submit="keluar = true">
+                                        @csrf
+                                        <button type="submit" :disabled="keluar" class="flex w-full items-center gap-3 px-4 py-2.5 text-left text-sm text-danger transition-colors hover:bg-danger-soft disabled:cursor-wait disabled:opacity-70">
+                                            <svg x-show="! keluar" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg><svg x-show="keluar" x-cloak class="h-5 w-5 shrink-0 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span x-text="keluar ? 'Keluar…' : 'Keluar'">Keluar</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
                     @else
                         @if (Route::has('login'))
                             <a href="{{ route('login') }}" class="inline-flex h-10 items-center gap-2 rounded-lg border border-line-strong px-4 text-sm font-medium transition-colors hover:bg-sunken"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/></svg>Masuk</a>
@@ -78,15 +108,35 @@
                 </nav>
                 <div class="mt-3 flex flex-col gap-2 border-t border-line pt-4">
                     @auth
-                        @if (auth()->user()->isAdmin())
-                            <a href="{{ url('/admin') }}" class="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-ink px-5 text-sm font-medium text-white transition-colors hover:bg-stone-800"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Panel Admin</a>
-                        @endif
-                        @if (! auth()->user()->isAdmin())
-                            <a href="{{ route('akun.pass') }}" class="inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-line-strong px-5 text-sm font-medium transition-colors hover:bg-sunken"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 11v2"/><path d="M13 17v2"/></svg>Pass Saya</a>
-                        @endif
-                        <form method="POST" action="{{ route('logout') }}">
+                        {{-- Blok akun panel mobile (15 Nov 2026): identitas + baris menu,
+                             sepasang dengan dropdown akun di desktop. --}}
+                        <div class="flex items-center gap-3 px-1.5 pb-1 pt-1">
+                            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent-soft text-base font-semibold text-accent">{{ auth()->user()->inisial() }}</span>
+                            <div class="min-w-0">
+                                <p class="truncate text-[15px] font-semibold">{{ auth()->user()->name }}</p>
+                                <p class="truncate text-[13px] text-ink-3">{{ auth()->user()->email }}</p>
+                            </div>
+                        </div>
+                        @php
+                            $kelasAkun = fn (bool $aktif) => $aktif
+                                ? 'flex items-center gap-3 rounded-lg bg-sunken px-3.5 py-2.5 text-[15px] font-semibold text-ink'
+                                : 'flex items-center gap-3 rounded-lg px-3.5 py-2.5 text-[15px] text-ink-2';
+                        @endphp
+                        <nav class="flex flex-col gap-1">
+                            @if (auth()->user()->isAdmin())
+                                <a href="{{ url('/admin') }}" class="{{ $kelasAkun(false) }}"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>Panel Admin</a>
+                                <a href="{{ route('admin.pengaturan') }}" class="{{ $kelasAkun(request()->routeIs('admin.pengaturan')) }}"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Pengaturan Akun</a>
+                            @else
+                                <a href="{{ route('akun.pass') }}" class="{{ $kelasAkun(request()->routeIs('akun.pass')) }}"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 11v2"/><path d="M13 17v2"/></svg>Pass Saya</a>
+                                <a href="{{ route('akun.redeem') }}" class="{{ $kelasAkun(request()->routeIs('akun.redeem')) }}"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0 3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>Redeem Kode</a>
+                                <a href="{{ route('akun.pengaturan') }}" class="{{ $kelasAkun(request()->routeIs('akun.pengaturan')) }}"><svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Pengaturan</a>
+                            @endif
+                        </nav>
+                        <form method="POST" action="{{ route('logout') }}" x-data="{ keluar: false }" @submit="keluar = true" class="mt-1 border-t border-line pt-3">
                             @csrf
-                            <button type="submit" class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 text-sm font-medium text-white transition-colors hover:bg-stone-800"><svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>Keluar</button>
+                            <button type="submit" :disabled="keluar" class="flex w-full items-center gap-3 rounded-lg px-3.5 py-2.5 text-left text-[15px] text-danger transition-colors hover:bg-danger-soft disabled:cursor-wait disabled:opacity-70">
+                                <svg x-show="! keluar" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg><svg x-show="keluar" x-cloak class="h-5 w-5 shrink-0 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span x-text="keluar ? 'Keluar…' : 'Keluar'">Keluar</span>
+                            </button>
                         </form>
                     @else
                         @if (Route::has('register'))
@@ -134,6 +184,46 @@
             </div>
         </div>
     </footer>
+
+    {{-- Sistem toast (15 Nov 2026; hadir juga di layout publik sejak paket menu akun — halaman Pengaturan peserta melapor lewat toast yang sama): komponen Livewire memancarkan
+         $this->dispatch('toast', tipe: 'sukses|galat|peringatan', pesan: '...')
+         dan wadah ini menampilkannya melayang — terlihat dari posisi scroll
+         mana pun, hilang sendiri setelah 5 detik, bisa ditutup manual. --}}
+    <div x-data="{
+            daftar: [],
+            berikut: 1,
+            tambah(e) {
+                const id = this.berikut++;
+                this.daftar.push({ id, tipe: e.detail.tipe ?? 'sukses', pesan: e.detail.pesan ?? '' });
+                setTimeout(() => this.hapus(id), 5000);
+            },
+            hapus(id) { this.daftar = this.daftar.filter((t) => t.id !== id); },
+         }"
+        @toast.window="tambah($event)"
+        class="pointer-events-none fixed inset-x-3 top-3 z-100 flex flex-col gap-2 sm:inset-x-auto sm:right-4 sm:top-4 sm:w-96"
+        aria-live="polite">
+        <template x-for="t in daftar" :key="t.id">
+            <div x-transition:enter="transition duration-300 ease-out"
+                 x-transition:enter-start="translate-x-4 opacity-0"
+                 x-transition:enter-end="translate-x-0 opacity-100"
+                 x-transition:leave="transition duration-200 ease-in"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 class="pointer-events-auto flex items-start gap-3 rounded-xl border border-line bg-surface p-4 shadow-float">
+                <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full"
+                      :class="t.tipe === 'galat' ? 'bg-danger-soft text-danger' : (t.tipe === 'peringatan' ? 'bg-warning-soft text-warning' : 'bg-success-soft text-success')">
+                    <svg x-show="t.tipe === 'sukses'" class="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>
+                    <svg x-show="t.tipe === 'galat'" class="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    <svg x-show="t.tipe === 'peringatan'" class="h-4.5 w-4.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3ZM12 9v4M12 17h.01"/></svg>
+                </span>
+                <p class="min-w-0 flex-1 pt-1.5 text-sm leading-5 text-ink" x-text="t.pesan"></p>
+                <button type="button" @click="hapus(t.id)" aria-label="Tutup notifikasi"
+                    class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-sunken hover:text-ink">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </template>
+    </div>
 
     @livewireScripts
 </body>

@@ -63,11 +63,12 @@
                     <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><path d="M15 3h6v6"/><path d="M10 14L21 3"/></svg>
                     Lihat Situs
                 </a>
-                <form method="POST" action="{{ route('logout') }}" class="mt-1">
+                <form method="POST" action="{{ route('logout') }}" class="mt-1" x-data="{ keluar: false }" @submit="keluar = true">
                     @csrf
-                    <button type="submit" class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-ink-2 transition-colors hover:bg-danger-soft hover:text-danger">
-                        <svg class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-                        Keluar
+                    <button type="submit" :disabled="keluar" class="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-sm text-ink-2 transition-colors hover:bg-danger-soft hover:text-danger disabled:cursor-wait disabled:opacity-70">
+                        <svg x-show="! keluar" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+                        <svg x-show="keluar" x-cloak class="h-5 w-5 shrink-0 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                        <span x-text="keluar ? 'Keluar…' : 'Keluar'">Keluar</span>
                     </button>
                 </form>
             </div>
@@ -103,9 +104,9 @@
                     <div class="mt-3 flex flex-col gap-2 border-t border-line pt-3">
                         <a href="{{ route('admin.pengaturan') }}" class="inline-flex h-11 items-center justify-center rounded-lg border border-line-strong px-5 text-sm font-medium transition-colors hover:bg-sunken">Pengaturan Akun</a>
                         <a href="{{ url('/') }}" class="inline-flex h-11 items-center justify-center rounded-lg border border-line-strong px-5 text-sm font-medium transition-colors hover:bg-sunken">Lihat Situs</a>
-                        <form method="POST" action="{{ route('logout') }}">
+                        <form method="POST" action="{{ route('logout') }}" x-data="{ keluar: false }" @submit="keluar = true">
                             @csrf
-                            <button type="submit" class="inline-flex h-11 w-full items-center justify-center rounded-lg bg-ink px-5 text-sm font-medium text-white transition-colors hover:bg-stone-800">Keluar</button>
+                            <button type="submit" :disabled="keluar" class="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-ink px-5 text-sm font-medium text-white transition-colors hover:bg-stone-800 disabled:cursor-wait disabled:opacity-80"><svg x-show="keluar" x-cloak class="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span x-text="keluar ? 'Keluar…' : 'Keluar'">Keluar</span></button>
                         </form>
                     </div>
                 </div>

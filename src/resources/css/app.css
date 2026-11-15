@@ -135,3 +135,36 @@
     );
     background-size: 22px 22px;
 }
+
+/* Halaman perpisahan keluar "/sampai-jumpa" (15 Nov 2026): bilah kemajuan
+   yang terisi selama 1,8 detik — SAMAKAN dengan jeda pengalihan di view-nya
+   (setTimeout 1800) — dan cincin denyut di belakang pin. Untuk pengguna
+   reduced-motion, blok pelunak di atas mematikan animasi sehingga bilah
+   langsung tampil penuh; pengalihan tetap berjalan sesuai jadwal. */
+@keyframes muat-keluar {
+    from {
+        width: 0%;
+    }
+    to {
+        width: 100%;
+    }
+}
+
+.bilah-keluar {
+    animation: muat-keluar 1.8s linear forwards;
+}
+
+@keyframes denyut-pin {
+    0% {
+        transform: scale(1);
+        opacity: 0.55;
+    }
+    100% {
+        transform: scale(1.85);
+        opacity: 0;
+    }
+}
+
+.cincin-denyut {
+    animation: denyut-pin 1.8s ease-out infinite;
+}

@@ -88,4 +88,13 @@ class User extends Authenticatable implements MustVerifyEmail, PasskeyUser
             ->get()
             ->contains(fn(UserPass $pass) => $pass->isAktif());
     }
+
+    public function inisial(): string
+    {
+        return collect(preg_split('/\s+/', trim($this->name)) ?: [])
+            ->filter()
+            ->take(2)
+            ->map(fn(string $kata) => Str::upper(Str::substr($kata, 0, 1)))
+            ->implode('') ?: '?';
+    }
 }
