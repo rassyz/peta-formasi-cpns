@@ -1,28 +1,28 @@
-<x-layouts::auth :title="__('Email verification')">
-    <div class="mt-4 flex flex-col gap-6">
-        <flux:text class="text-center">
-            {{ __('Please verify your email address by clicking on the link we just emailed to you.') }}
-        </flux:text>
+<x-layouts::auth :title="'Verifikasi email'">
+    <div class="flex flex-col gap-6">
+        <p class="text-center text-[15px] leading-7 text-ink-2">
+            Verifikasi alamat emailmu dengan mengeklik tautan yang baru saja kami kirim ke emailmu.
+        </p>
 
         @if (session('status') == 'verification-link-sent')
-            <flux:text class="text-center font-medium !dark:text-green-400 !text-green-600">
-                {{ __('A new verification link has been sent to the email address you provided during registration.') }}
-            </flux:text>
+            <p class="text-center text-[15px] font-medium leading-7 text-success">
+                Tautan verifikasi baru telah dikirim ke alamat email yang kamu daftarkan.
+            </p>
         @endif
 
-        <div class="flex flex-col items-center justify-between space-y-3">
-            <form method="POST" action="{{ route('verification.send') }}">
+        <div class="flex flex-col items-center gap-3">
+            <form method="POST" action="{{ route('verification.send') }}" class="w-full">
                 @csrf
-                <flux:button type="submit" variant="primary" class="w-full">
-                    {{ __('Resend verification email') }}
-                </flux:button>
+                <x-ui.button variant="primary" type="submit" class="w-full">
+                    Kirim ulang email verifikasi
+                </x-ui.button>
             </form>
 
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <flux:button variant="ghost" type="submit" class="text-sm cursor-pointer" data-test="logout-button">
-                    {{ __('Log out') }}
-                </flux:button>
+                <x-ui.button variant="ghost" type="submit" data-test="logout-button">
+                    Keluar
+                </x-ui.button>
             </form>
         </div>
     </div>

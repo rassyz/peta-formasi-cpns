@@ -1,69 +1,68 @@
-<x-layouts::auth :title="__('Register')">
+<x-layouts::auth :title="'Daftar'">
     <div class="flex flex-col gap-6">
-        <x-auth-header :title="__('Create an account')" :description="__('Enter your details below to create your account')" />
+        <x-auth-header title="Buat akun" description="Isi data di bawah ini untuk membuat akunmu" />
 
         <!-- Session Status -->
         <x-auth-session-status class="text-center" :status="session('status')" />
 
         <form method="POST" action="{{ route('register.store') }}" class="flex flex-col gap-6">
             @csrf
-            <!-- Name -->
-            <flux:input
+
+            <!-- Nama -->
+            <x-ui.input
                 name="name"
-                :label="__('Name')"
-                :value="old('name')"
+                label="Nama"
                 type="text"
+                value="{{ old('name') }}"
                 required
                 autofocus
                 autocomplete="name"
-                :placeholder="__('Full name')"
+                placeholder="Nama lengkap"
             />
 
-            <!-- Email Address -->
-            <flux:input
+            <!-- Email -->
+            <x-ui.input
                 name="email"
-                :label="__('Email address')"
-                :value="old('email')"
+                label="Email"
                 type="email"
+                value="{{ old('email') }}"
                 required
                 autocomplete="email"
                 placeholder="email@example.com"
             />
 
-            <!-- Password -->
-            <flux:input
-                name="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Password')"
-                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
-                viewable
-            />
-
-            <!-- Confirm Password -->
-            <flux:input
-                name="password_confirmation"
-                :label="__('Confirm password')"
-                type="password"
-                required
-                autocomplete="new-password"
-                :placeholder="__('Confirm password')"
-                passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
-                viewable
-            />
-
-            <div class="flex items-center justify-end">
-                <flux:button type="submit" variant="primary" class="w-full" data-test="register-user-button">
-                    {{ __('Create account') }}
-                </flux:button>
+            <!-- Kata sandi -->
+            <div x-data="{ tampil: false }">
+                <label for="password" class="mb-1.5 block text-sm font-medium">Kata sandi</label>
+                <div class="relative">
+                    <input id="password" name="password" type="password" :type="tampil ? 'text' : 'password'" required autocomplete="new-password" placeholder="Kata sandi"
+                        passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
+                        class="h-11 w-full rounded-lg border bg-surface px-3.5 pr-11 text-[15px] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 {{ $errors->has('password') ? 'border-danger' : 'border-line-strong' }}">
+                    <button type="button" @click="tampil = ! tampil" :aria-label="tampil ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'" class="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-3 transition-colors hover:text-ink"><svg x-show="! tampil" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg x-show="tampil" x-cloak class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button>
+                </div>
+                @error('password') <p class="mt-1.5 text-[13px] text-danger">{{ $message }}</p> @enderror
             </div>
+
+            <!-- Konfirmasi kata sandi -->
+            <div x-data="{ tampil: false }">
+                <label for="password_confirmation" class="mb-1.5 block text-sm font-medium">Konfirmasi kata sandi</label>
+                <div class="relative">
+                    <input id="password_confirmation" name="password_confirmation" type="password" :type="tampil ? 'text' : 'password'" required autocomplete="new-password" placeholder="Konfirmasi kata sandi"
+                        passwordrules="{{ \Illuminate\Validation\Rules\Password::defaults()->toPasswordRulesString() }}"
+                        class="h-11 w-full rounded-lg border bg-surface px-3.5 pr-11 text-[15px] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30 {{ $errors->has('password_confirmation') ? 'border-danger' : 'border-line-strong' }}">
+                    <button type="button" @click="tampil = ! tampil" :aria-label="tampil ? 'Sembunyikan kata sandi' : 'Tampilkan kata sandi'" class="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-ink-3 transition-colors hover:text-ink"><svg x-show="! tampil" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg><svg x-show="tampil" x-cloak class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg></button>
+                </div>
+                @error('password_confirmation') <p class="mt-1.5 text-[13px] text-danger">{{ $message }}</p> @enderror
+            </div>
+
+            <x-ui.button variant="primary" type="submit" class="w-full" data-test="register-user-button">
+                Buat akun
+            </x-ui.button>
         </form>
 
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
-            <span>{{ __('Already have an account?') }}</span>
-            <flux:link :href="route('login')" wire:navigate>{{ __('Log in') }}</flux:link>
-        </div>
+        <p class="text-center text-sm text-ink-2">
+            <span>Sudah punya akun?</span>
+            <a href="{{ route('login') }}" wire:navigate class="font-medium text-accent hover:text-accent-hover hover:underline">Masuk</a>
+        </p>
     </div>
 </x-layouts::auth>
