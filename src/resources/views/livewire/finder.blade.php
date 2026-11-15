@@ -98,6 +98,17 @@
                     </select>
                 </div>
 
+                {{-- Penempatan --}}
+                <div class="mt-6 border-t border-line pt-5">
+                    <label for="finder_penempatan" class="mb-1.5 block text-sm font-semibold">Penempatan</label>
+                    <select id="finder_penempatan" wire:model.live="penempatan" class="h-10 w-full rounded-lg border border-line-strong bg-surface px-2.5 text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30">
+                        <option value="">Semua penempatan</option>
+                        @foreach ($penempatanList as $p)
+                            <option value="{{ $p }}">{{ $p }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
                 {{-- Jenis kebutuhan --}}
                 <div class="mt-6 border-t border-line pt-5">
                     <h3 class="text-sm font-semibold">Jenis Kebutuhan</h3>
@@ -160,7 +171,7 @@
                 {{-- Chip filter aktif (muncul hanya bila ada saringan yang menyala) --}}
                 @php
                     $chipInstansi = $instansiId !== '' ? $instansiList->firstWhere('id', (int) $instansiId) : null;
-                    $adaFilterAktif = $jurusan || trim($kataKunci) !== '' || $wilayah !== '' || $chipInstansi || $jenis !== '' || $hanyaNolPelamar;
+                    $adaFilterAktif = $jurusan || trim($kataKunci) !== '' || $wilayah !== '' || $chipInstansi || $penempatan !== '' || $jenis !== '' || $hanyaNolPelamar;
                 @endphp
                 @if ($adaFilterAktif)
                     <div class="mt-3 flex flex-wrap items-center gap-2">
@@ -195,6 +206,15 @@
                             <span class="inline-flex items-center gap-1.5 rounded-full bg-sunken py-1.5 pl-3.5 pr-2 text-sm">
                                 {{ $chipInstansi->nama }}
                                 <button type="button" wire:click="$set('instansiId', '')" aria-label="Hapus filter instansi"
+                                    class="flex h-5 w-5 items-center justify-center rounded-full text-ink-2 transition-colors hover:bg-line hover:text-ink">
+                                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                                </button>
+                            </span>
+                        @endif
+                        @if ($penempatan !== '')
+                            <span class="inline-flex items-center gap-1.5 rounded-full bg-sunken py-1.5 pl-3.5 pr-2 text-sm">
+                                {{ $penempatan }}
+                                <button type="button" wire:click="$set('penempatan', '')" aria-label="Hapus filter penempatan"
                                     class="flex h-5 w-5 items-center justify-center rounded-full text-ink-2 transition-colors hover:bg-line hover:text-ink">
                                     <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
                                 </button>

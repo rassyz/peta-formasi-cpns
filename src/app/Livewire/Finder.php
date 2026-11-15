@@ -49,6 +49,9 @@ class Finder extends Component
     #[Url]
     public string $jenis = ''; // '' | umum | cumlaude | disabilitas | ...
 
+    #[Url]
+    public string $penempatan = ''; // '' | nilai penempatan persis, mis. "Regional Jawa"
+
     #[Url(as: 'nol')]
     public bool $hanyaNolPelamar = false;
 
@@ -205,6 +208,7 @@ class Finder extends Component
         $this->jurusanSlug = '';
         $this->kataKunci = '';
         $this->instansiId = '';
+        $this->penempatan = '';
         $this->wilayah = '';
         $this->jenis = '';
         $this->hanyaNolPelamar = false;
@@ -264,6 +268,10 @@ class Finder extends Component
 
         if ($this->instansiId !== '') {
             $query->where('instansi_id', (int) $this->instansiId);
+        }
+
+        if ($this->penempatan !== '') {
+            $query->where('penempatan', $this->penempatan);
         }
 
         if ($this->wilayah !== '') {
@@ -330,6 +338,17 @@ class Finder extends Component
             ->whereHas('formasi', fn(Builder $q) => $q->where('musim_id', $this->musimId)->terbit())
             ->orderBy('nama')
             ->get();
+
+        // Daftar penempatan unik yang benar-benar ada pada musim tampil —
+        // isi select filter Penempatan (nilai persis, bukan tebakan).
+        $penempatanList = Formasi::query()
+            ->where('musim_id', $this->musimId)
+            ->terbit()
+            ->whereNotNull('penempatan')
+            ->where('penempatan', '!=', '')
+            ->distinct()
+            ->orderBy('penempatan')
+            ->pluck('penempatan');
 
         $jenisList = DB::table('formasi_kuota')
             ->join('formasi', 'formasi.id', '=', 'formasi_kuota.formasi_id')
@@ -431,6 +450,7 @@ class Finder extends Component
                 'jenjang' => $j->jenjang,
             ])->all(),
             'instansiList' => $instansiList,
+            'penempatanList' => $penempatanList,
             'jenisList' => $jenisList,
             'hasil' => $hasil,
             'jumlahNol' => $jumlahNol,
