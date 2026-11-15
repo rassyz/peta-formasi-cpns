@@ -194,6 +194,24 @@ class Finder extends Component
         $this->resetPage();
     }
 
+    /**
+     * Kosongkan semua saringan daftar sekaligus (chip "Reset Filter").
+     * Musim sengaja TIDAK ikut direset — musim adalah konteks tampilan,
+     * bukan saringan. resetPage() dipanggil eksplisit karena penetapan
+     * properti dari dalam method tidak memicu updated().
+     */
+    public function resetFilter(): void
+    {
+        $this->jurusanSlug = '';
+        $this->kataKunci = '';
+        $this->instansiId = '';
+        $this->wilayah = '';
+        $this->jenis = '';
+        $this->hanyaNolPelamar = false;
+        $this->hanyaLolos = false;
+        $this->resetPage();
+    }
+
     public function updated(string $properti): void
     {
         if ($properti !== 'page') {
@@ -324,57 +342,77 @@ class Finder extends Component
         $hasil = null;
         $jumlahNol = 0;
         $musimAktif = $musimList->firstWhere('id', $this->musimId);
+
+        // Total seluruh formasi terbit pada musim — penyebut untuk ringkasan
+        // "X formasi dari Y formasi" (gaya referensi "18 dari 551 lowongan").
+        $totalMusim = Formasi::query()
+            ->where('musim_id', $this->musimId)
+            ->terbit()
+            ->count();
         $bolehCek = $this->bolehCek($musimAktif);
+
+        // Hak melihat angka Pelamar MS di kartu (amendemen FR-A2, 15 Nov
+        // 2026): pass aktif tipe apa pun untuk musim yang sedang tampil.
+        // Angka hanya diteruskan ke kartu bila hak ini benar — browser
+        // pengguna lain tidak pernah menerimanya.
+        /** @var User|null $penggunaKartu */
+        $penggunaKartu = Auth::user();
+        $bolehLihatPelamar = $penggunaKartu !== null && $musimAktif !== null
+            && $penggunaKartu->punyaAksesMusim($musimAktif);
         $profil = $bolehCek ? $this->profilSesi() : null;
         $kelayakanPeta = [];
 
         // Mode nama: tanpa jurusan, hasil tampil bila kata kunci ≥ 2 huruf.
         $modeNama = $jurusan === null && mb_strlen(trim($this->kataKunci)) >= 2;
 
-        if ($jurusan !== null || $modeNama) {
-            $queryNol = $this->queryDasar($jurusan);
-            if (! $this->hanyaNolPelamar) {
-                $this->kondisiNolPelamar($queryNol);
-            }
-            $jumlahNol = $queryNol->count();
+        // Mode semua (keputusan 15 Nov 2026): tanpa jurusan & tanpa kata
+        // kunci, daftar tetap tampil — telusur dulu, saring kemudian.
+        // queryDasar() memang menerima jurusan null & kata kunci kosong,
+        // jadi hasil sekarang selalu dihitung.
+        $modeSemua = $jurusan === null && ! $modeNama;
 
-            $query = $this->queryDasar($jurusan);
-            $this->terapkanUrutan($query);
+        $queryNol = $this->queryDasar($jurusan);
+        if (! $this->hanyaNolPelamar) {
+            $this->kondisiNolPelamar($queryNol);
+        }
+        $jumlahNol = $queryNol->count();
 
-            if ($profil !== null && $this->hanyaLolos && $jurusan !== null) {
-                // FR-B3 harus menyaring seluruh hasil, bukan hanya 12 kartu
-                // pada halaman aktif. Karena itu nilai dulu semua baris yang
-                // cocok dengan filter daftar, baru buat paginator manual.
+        $query = $this->queryDasar($jurusan);
+        $this->terapkanUrutan($query);
+
+        if ($profil !== null && $this->hanyaLolos && $jurusan !== null) {
+            // FR-B3 harus menyaring seluruh hasil, bukan hanya 15 kartu
+            // pada halaman aktif. Karena itu nilai dulu semua baris yang
+            // cocok dengan filter daftar, baru buat paginator manual.
+            $cek = app(CekKelayakan::class);
+            $semua = $query
+                ->with(['instansi', 'musim', 'kuota.snapshotTerakhir', 'jurusan'])
+                ->get()
+                ->filter(function (Formasi $formasi) use ($cek, $jurusan, $profil, &$kelayakanPeta) {
+                    $hasilCek = $cek->nilai($formasi, $jurusan, $profil);
+                    $kelayakanPeta[$formasi->id] = $hasilCek;
+
+                    return $hasilCek['status'] === 'lolos';
+                })
+                ->values();
+
+            $halaman = $this->getPage();
+            $hasil = new LengthAwarePaginator(
+                $semua->forPage($halaman, 15),
+                $semua->count(),
+                15,
+                $halaman,
+                ['path' => request()->url(), 'pageName' => 'page']
+            );
+        } else {
+            $hasil = $query
+                ->with(['instansi', 'musim', 'kuota.snapshotTerakhir', 'jurusan'])
+                ->paginate(15);
+
+            if ($profil !== null && $jurusan !== null) {
                 $cek = app(CekKelayakan::class);
-                $semua = $query
-                    ->with(['instansi', 'musim', 'kuota', 'jurusan'])
-                    ->get()
-                    ->filter(function (Formasi $formasi) use ($cek, $jurusan, $profil, &$kelayakanPeta) {
-                        $hasilCek = $cek->nilai($formasi, $jurusan, $profil);
-                        $kelayakanPeta[$formasi->id] = $hasilCek;
-
-                        return $hasilCek['status'] === 'lolos';
-                    })
-                    ->values();
-
-                $halaman = $this->getPage();
-                $hasil = new LengthAwarePaginator(
-                    $semua->forPage($halaman, 12),
-                    $semua->count(),
-                    12,
-                    $halaman,
-                    ['path' => request()->url(), 'pageName' => 'page']
-                );
-            } else {
-                $hasil = $query
-                    ->with(['instansi', 'musim', 'kuota', 'jurusan'])
-                    ->paginate(12);
-
-                if ($profil !== null && $jurusan !== null) {
-                    $cek = app(CekKelayakan::class);
-                    foreach ($hasil->items() as $formasi) {
-                        $kelayakanPeta[$formasi->id] = $cek->nilai($formasi, $jurusan, $profil);
-                    }
+                foreach ($hasil->items() as $formasi) {
+                    $kelayakanPeta[$formasi->id] = $cek->nilai($formasi, $jurusan, $profil);
                 }
             }
         }
@@ -397,6 +435,9 @@ class Finder extends Component
             'hasil' => $hasil,
             'jumlahNol' => $jumlahNol,
             'modeNama' => $modeNama ?? false,
+            'modeSemua' => $modeSemua,
+            'totalMusim' => $totalMusim,
+            'bolehLihatPelamar' => $bolehLihatPelamar,
         ]);
     }
 }

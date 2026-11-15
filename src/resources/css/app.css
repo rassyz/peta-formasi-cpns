@@ -56,6 +56,11 @@
     /* Shadow hanya untuk elemen melayang (DESIGN.md §2.3) */
     --shadow-float:
         0 1px 2px rgb(28 25 23 / 0.05), 0 8px 24px -8px rgb(28 25 23 / 0.1);
+    --shadow-lift:
+        0 18px 34px -12px rgb(37 99 235 / 0.3),
+        0 8px 16px -8px rgb(37 99 235 / 0.2);
+    --shadow-card:
+        0 1px 2px rgb(28 25 23 / 0.07), 0 3px 8px -2px rgb(28 25 23 / 0.12);
 }
 
 @layer theme {
@@ -84,7 +89,6 @@
         *,
         *::before,
         *::after {
-            transition-duration: 0.01ms !important;
             animation-duration: 0.01ms !important;
         }
     }
@@ -100,6 +104,17 @@
     a.rounded-lg,
     button.rounded-lg {
         border-radius: 1rem;
+    }
+}
+
+@layer base {
+    /* Kursor tombol (revisi 15 Nov 2026): preflight Tailwind v4 menetapkan
+       cursor: default untuk <button>, sehingga tombol tidak menampilkan
+       tangan penunjuk seperti tautan <a>. Kembalikan perilaku yang
+       diharapkan pengguna untuk semua tombol yang tidak dinonaktifkan,
+       berlaku di seluruh sistem (publik maupun admin). */
+    button:not(:disabled) {
+        cursor: pointer;
     }
 }
 

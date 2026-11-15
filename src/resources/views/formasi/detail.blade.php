@@ -263,7 +263,7 @@
                                     @if ($sepi)
                                         <div class="mt-3 flex flex-wrap items-center gap-x-3.5 gap-y-2">
                                             <p class="text-3xl font-bold tracking-tight text-accent">Sepi</p>
-                                            <x-ui.badge variant="accent">0 pelamar MS</x-ui.badge>
+                                            <x-ui.badge variant="accent">0 pelamar memenuhi syarat</x-ui.badge>
                                         </div>
                                         <div class="mt-3 h-2.5 rounded-full bg-accent" role="img" aria-label="Meter peluang: sepi, nol pelamar memenuhi syarat"></div>
                                         <p class="mt-2 text-sm leading-6 text-ink-2">
@@ -294,7 +294,7 @@
                                             <span class="flex-1">Longgar ≥5%</span>
                                         </div>
                                         <p class="mt-2 text-sm leading-6 text-ink-2">
-                                            Dari <span class="tnum font-semibold text-ink">{{ number_format($snapT->jumlah_ms, 0, ',', '.') }}</span> pelamar MS
+                                            Dari <span class="tnum font-semibold text-ink">{{ number_format($snapT->jumlah_ms, 0, ',', '.') }}</span> pelamar memenuhi syarat
                                             untuk kuota <span class="tnum font-semibold text-ink">{{ number_format($ks['jumlah'], 0, ',', '.') }}</span>.
                                         </p>
                                     @endif
@@ -314,14 +314,14 @@
                                             @endforeach
                                         </svg>
                                         <p class="mt-1 flex justify-between gap-3 text-[11px] text-ink-3">
-                                            <span>{{ $riwayatNaik->first()->tanggal_snapshot?->translatedFormat('d M Y') }} · MS <span class="tnum">{{ number_format($riwayatNaik->first()->jumlah_ms, 0, ',', '.') }}</span></span>
-                                            <span class="text-right">{{ $riwayatNaik->last()->tanggal_snapshot?->translatedFormat('d M Y') }} · MS <span class="tnum">{{ number_format($riwayatNaik->last()->jumlah_ms, 0, ',', '.') }}</span></span>
+                                            <span>{{ $riwayatNaik->first()->tanggal_snapshot?->translatedFormat('d M Y') }} · Memenuhi Syarat <span class="tnum">{{ number_format($riwayatNaik->first()->jumlah_ms, 0, ',', '.') }}</span></span>
+                                            <span class="text-right">{{ $riwayatNaik->last()->tanggal_snapshot?->translatedFormat('d M Y') }} · Memenuhi Syarat <span class="tnum">{{ number_format($riwayatNaik->last()->jumlah_ms, 0, ',', '.') }}</span></span>
                                         </p>
                                     @elseif ($riwayatNaik->count() === 1)
                                         <svg class="mt-3 w-full" viewBox="0 0 300 96" role="img" aria-label="Baru ada satu snapshot pelamar">
                                             <line x1="8" x2="292" y1="88" y2="88" class="stroke-line" stroke-width="1" />
                                             <circle cx="150" cy="46" r="4" class="fill-accent" />
-                                            <text x="150" y="30" text-anchor="middle" class="fill-ink text-[12px] font-semibold">MS {{ number_format($riwayatNaik->first()->jumlah_ms, 0, ',', '.') }}</text>
+                                            <text x="150" y="30" text-anchor="middle" class="fill-ink text-[12px] font-semibold">Memenuhi Syarat {{ number_format($riwayatNaik->first()->jumlah_ms, 0, ',', '.') }}</text>
                                         </svg>
                                         <p class="mt-1 text-center text-[11px] text-ink-3">Baru satu snapshot — grafik tren terbentuk setelah snapshot berikutnya masuk.</p>
                                     @endif
@@ -330,7 +330,7 @@
                                         @foreach ($ks['riwayat'] as $snap)
                                             <li>
                                                 {{ $snap->tanggal_snapshot?->translatedFormat('d M Y') }} · {{ ucfirst($snap->tipe) }} ·
-                                                MS <span class="tnum">{{ number_format($snap->jumlah_ms, 0, ',', '.') }}</span>
+                                                Memenuhi Syarat <span class="tnum">{{ number_format($snap->jumlah_ms, 0, ',', '.') }}</span>
                                                 @if ($snap->jumlah_total !== null) · Total <span class="tnum">{{ number_format($snap->jumlah_total, 0, ',', '.') }}</span>@endif
                                                 @if ($snap->sumber) · {{ $snap->sumber }}@endif
                                             </li>
