@@ -28,6 +28,12 @@
                 <option value="{{ $i->id }}">{{ $i->nama }}</option>
             @endforeach
         </select>
+        <select wire:model.live="saringPenempatan" class="h-10 rounded-lg border border-line-strong bg-surface px-2.5 text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" aria-label="Regional">
+            <option value="">Semua regional</option>
+            @foreach ($penempatanList as $p)
+                <option value="{{ $p }}">{{ $p }}</option>
+            @endforeach
+        </select>
         <select wire:model.live="saringStatus" class="h-10 rounded-lg border border-line-strong bg-surface px-2.5 text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" aria-label="Status">
             <option value="">Semua status</option>
             <option value="draft">Draft</option>
@@ -69,7 +75,16 @@
                         </td>
                         <td class="px-4 py-3">{{ $f->instansi->nama }}</td>
                         <td class="tnum px-4 py-3">{{ number_format($f->total_kuota ?? 0, 0, ',', '.') }}</td>
-                        <td class="tnum px-4 py-3">{{ $f->jurusan_count }}</td>
+                        <td class="px-4 py-3">
+                            @if ($f->jurusan->isEmpty())
+                                <span class="text-ink-3">—</span>
+                            @else
+                                <span class="text-ink-2">{{ $f->jurusan->take(3)->map(fn ($j) => $j->jenjang . ' ' . $j->nama)->join(', ') }}</span>
+                                @if ($f->jurusan->count() > 3)
+                                    <span class="text-ink-3">+{{ $f->jurusan->count() - 3 }} lainnya</span>
+                                @endif
+                            @endif
+                        </td>
                         <td class="px-4 py-3">
                             @if ($f->status_terbit === 'terbit')
                                 <x-ui.badge variant="success">Terbit</x-ui.badge>
@@ -79,6 +94,7 @@
                         </td>
                         <td class="px-4 py-3">
                             <div class="flex flex-wrap gap-x-3 gap-y-1 whitespace-nowrap">
+                                <a href="{{ route('formasi.show', $f->slug) }}" target="_blank" rel="noopener" class="font-medium text-accent hover:underline">Lihat</a>
                                 @if ($f->status_terbit === 'draft')
                                     <button type="button" wire:click="terbitkan({{ $f->id }})" class="font-medium text-accent hover:underline">Terbitkan</button>
                                     <button type="button" wire:click="mintaKonfirmasi('hapus', [{{ $f->id }}], 'Hapus formasi draft?', 'Hapus formasi draft ini beserta kuota & kualifikasinya? Tindakan ini tidak bisa dibatalkan.', true, 'Ya, hapus')" class="font-medium text-danger hover:underline">Hapus</button>
@@ -104,13 +120,39 @@
 
         <form wire:submit="simpanSnapshot" class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <div class="lg:col-span-2">
-                <label for="snap-formasi" class="mb-1.5 block text-sm font-medium">Formasi</label>
-                <select id="snap-formasi" wire:model.live="snapshotFormasiId" class="h-11 w-full rounded-lg border border-line-strong bg-surface px-2.5 text-[15px] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30">
-                    <option value="">— Pilih formasi —</option>
-                    @foreach ($formasiUntukSnapshot as $f)
-                        <option value="{{ $f->id }}">{{ $f->jabatan }} — {{ $f->penempatan }}</option>
-                    @endforeach
-                </select>
+                <div wire:key="snapshot-combobox-{{ $snapshotFormasiId ?: 'none' }}" class="relative" x-data="{
+                    open: false,
+                    query: @js($labelSnapshotTerpilih),
+                    items: @js($snapshotItems),
+                    get filtered() {
+                        const kata = this.query.trim().toLowerCase().split(/\s+/).filter(Boolean);
+                        if (! kata.length) return this.items;
+                        return this.items.filter(i => { const l = i.label.toLowerCase(); return kata.every(k => l.includes(k)); });
+                    },
+                    pilih(item) { this.query = item.label; this.open = false; $wire.set('snapshotFormasiId', item.id); },
+                    bersihkan() { this.query = ''; $wire.set('snapshotFormasiId', ''); }
+                }" @click.away="open = false" @keydown.escape="open = false">
+                    <label for="snap-formasi" class="mb-1.5 block text-sm font-medium">Formasi</label>
+                    <div class="relative">
+                        <svg class="pointer-events-none absolute left-3.5 top-1/2 h-5 w-5 -translate-y-1/2 text-ink-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+                        <input id="snap-formasi" type="text" x-model="query" @focus="open = true" @input="open = true"
+                            placeholder="Ketik jabatan, penempatan, atau jurusan…"
+                            autocomplete="off" role="combobox" :aria-expanded="open"
+                            class="h-11 w-full rounded-lg border border-line-strong bg-surface pl-10 pr-10 text-[15px] focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30">
+                        <button type="button" x-show="query" x-cloak @click="bersihkan()" aria-label="Bersihkan pilihan formasi"
+                            class="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full text-ink-3 transition-colors hover:bg-sunken hover:text-ink">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                        </button>
+                    </div>
+                    <ul x-show="open" x-cloak class="absolute inset-x-0 top-full z-30 mt-2 max-h-72 overflow-y-auto rounded-xl border border-line bg-surface py-1.5 shadow-float">
+                        <template x-for="item in filtered" :key="item.id">
+                            <li>
+                                <button type="button" @click="pilih(item)" class="w-full px-3.5 py-2.5 text-left text-sm transition-colors hover:bg-sunken" x-text="item.label"></button>
+                            </li>
+                        </template>
+                        <li x-show="filtered.length === 0" class="px-3.5 py-2.5 text-sm text-ink-2">Tidak ada formasi yang cocok.</li>
+                    </ul>
+                </div>
                 @error('snapshotFormasiId') <p class="mt-1.5 text-[13px] text-danger">{{ $message }}</p> @enderror
             </div>
             <div>

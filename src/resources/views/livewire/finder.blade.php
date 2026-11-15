@@ -1,7 +1,7 @@
 <div class="mx-auto max-w-7xl px-4 pt-10 pb-24 sm:px-6 lg:px-8 lg:pb-8">
     {{-- Kepala Finder — rangka bersama (x-ui.kepala-halaman), varian polos --}}
     <x-ui.kepala-halaman judul="Cari Formasi" varian="polos">
-        Semua fungsi daftar ini <span class="font-medium text-ink">gratis</span> — telusuri formasinya, lalu persempit menurut jurusanmu.
+        Semua fungsi daftar ini gratis — telusuri formasinya, lalu persempit menurut jurusanmu.
     </x-ui.kepala-halaman>
 
     <div x-data="{ filterTerbuka: false }">
@@ -69,19 +69,6 @@
                             <option value="{{ $m->id }}">{{ $m->label }} · {{ ucfirst($m->status) }}</option>
                         @endforeach
                     </select>
-                </div>
-
-                {{-- Wilayah --}}
-                <div class="mt-6 border-t border-line pt-5">
-                    <h3 class="text-sm font-semibold">Wilayah</h3>
-                    <div class="mt-2.5 flex flex-col gap-1" role="group" aria-label="Wilayah">
-                        @foreach (['' => 'Semua wilayah', 'pusat' => 'Pusat', 'daerah' => 'Daerah'] as $nilai => $label)
-                            <button type="button" wire:click="$set('wilayah', '{{ $nilai }}')"
-                                class="rounded-lg px-3 py-2 text-left text-sm transition-colors {{ $wilayah === $nilai ? 'bg-ink font-medium text-white' : 'text-ink-2 hover:bg-sunken hover:text-ink' }}">
-                                {{ $label }}
-                            </button>
-                        @endforeach
-                    </div>
                 </div>
 
                 {{-- Instansi --}}
@@ -168,7 +155,7 @@
                 {{-- Chip filter aktif (muncul hanya bila ada saringan yang menyala) --}}
                 @php
                     $chipInstansi = $instansiId !== '' ? $instansiList->firstWhere('id', (int) $instansiId) : null;
-                    $adaFilterAktif = $jurusan || trim($kataKunci) !== '' || $wilayah !== '' || $chipInstansi || $penempatan !== '' || $jenis !== '' || $hanyaNolPelamar;
+                    $adaFilterAktif = $jurusan || trim($kataKunci) !== '' || $chipInstansi || $penempatan !== '' || $jenis !== '' || $hanyaNolPelamar;
                 @endphp
                 @if ($adaFilterAktif)
                     <div class="mt-3 flex flex-wrap items-center gap-2">
@@ -185,15 +172,6 @@
                             <span class="inline-flex items-center gap-1.5 rounded-full bg-sunken py-1.5 pl-3.5 pr-2 text-sm">
                                 &ldquo;{{ trim($kataKunci) }}&rdquo;
                                 <button type="button" wire:click="$set('kataKunci', '')" aria-label="Hapus kata kunci pencarian"
-                                    class="flex h-5 w-5 items-center justify-center rounded-full text-ink-2 transition-colors hover:bg-line hover:text-ink">
-                                    <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                                </button>
-                            </span>
-                        @endif
-                        @if ($wilayah !== '')
-                            <span class="inline-flex items-center gap-1.5 rounded-full bg-sunken py-1.5 pl-3.5 pr-2 text-sm">
-                                {{ ucfirst($wilayah) }}
-                                <button type="button" wire:click="$set('wilayah', '')" aria-label="Hapus filter wilayah"
                                     class="flex h-5 w-5 items-center justify-center rounded-full text-ink-2 transition-colors hover:bg-line hover:text-ink">
                                     <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
                                 </button>
@@ -424,10 +402,10 @@
                                         :jabatan="$f->jabatan"
                                         :instansi="$f->instansi->nama"
                                         :penempatan="$f->penempatan"
-                                        :wilayah="ucfirst($f->instansi->wilayah)"
                                         :kebutuhan="$utama ? ucfirst($utama->jenis_kebutuhan) : null"
                                         :kuota="$utama?->jumlah"
-                                        :pelamar-ms="($bolehLihatPelamar || $f->kartu_contoh) ? $utama?->snapshotTerakhir?->jumlah_ms : null"
+                                        :total-kuota="$f->kuota->sum('jumlah')"
+                                        :pelamar-total="($bolehLihatPelamar || $f->kartu_contoh) ? $utama?->snapshotTerakhir?->jumlah_total : null"
                                         :pelamar-terkunci="! $bolehLihatPelamar && ! $f->kartu_contoh && $utama?->snapshotTerakhir !== null"
                                         :musim-label="$f->musim->label . ' · ' . ucfirst($f->musim->status)"
                                         :tampilkan-musim="false"

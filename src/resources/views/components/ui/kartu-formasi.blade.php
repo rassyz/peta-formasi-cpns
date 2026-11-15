@@ -2,7 +2,6 @@
     'jabatan',
     'instansi',
     'penempatan' => null,
-    'wilayah' => null,        // Pusat | Daerah
     'kebutuhan' => null,      // Jenis kebutuhan, mis. Umum
     'kuota' => null,
     'musimLabel' => null,     // Mis. CPNS 2024 · Historis
@@ -11,8 +10,9 @@
     'contoh' => false,
     'href' => '#',
     'tampilkanMusim' => true, // Finder mematikan ini: daftarnya selalu satu musim
-    'pelamarMs' => null,      // Jumlah pelamar memenuhi syarat snapshot terakhir — HANYA diisi untuk yang berhak (FR-A2)
+    'pelamarTotal' => null,   // Total pendaftar snapshot terakhir — HANYA diisi untuk yang berhak (FR-A2)
     'pelamarTerkunci' => false, // true = tampilkan baris teaser terkunci tanpa angka
+    'totalKuota' => null,      // Jumlah SEMUA baris kuota formasi; baris "Total" hanya tampil bila > kuota utama
 ])
 
 @php
@@ -24,7 +24,7 @@
     };
 @endphp
 
-{{-- Kartu daftar SELALU polos (PRD §5): tidak ada angka pelamar/rasio/gaji di sini. --}}
+{{-- Kartu daftar polos (PRD §5): tanpa rasio/gaji. Angka pelamar di kartu = total pendaftar snapshot terakhir, hanya untuk pemegang pass (FR-A2); MS difiturkan di detail. Kuota tampil sebagai pil. --}}
 <a href="{{ $href }}" class="group isolate relative flex h-full flex-col rounded-xl border border-line bg-surface p-4 shadow-card transition-[translate,transform,border-color] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] after:pointer-events-none after:absolute after:inset-0 after:-z-10 after:rounded-xl after:shadow-lift after:opacity-0 after:transition-opacity after:duration-300 hover:border-accent/50 hover:after:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent hover:-translate-y-1">
     <div class="flex items-start justify-between gap-3">
         <h3 class="text-[15px] font-semibold leading-snug text-ink sm:text-base">{{ $jabatan }}</h3>
@@ -44,10 +44,10 @@
         <span>{{ $instansi }}</span>
     </p>
 
-    @if ($pelamarMs !== null)
+    @if ($pelamarTotal !== null)
         <p class="mt-2 flex items-center gap-1.5 text-[13px] text-ink-2">
             <svg class="h-4 w-4 shrink-0 text-ink-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Pelamar Memenuhi Syarat <span class="tnum font-semibold text-ink">{{ number_format($pelamarMs, 0, ',', '.') }}</span>
+            Pelamar <span class="tnum font-semibold text-ink">{{ number_format($pelamarTotal, 0, ',', '.') }}</span>
         </p>
     @elseif ($pelamarTerkunci)
         <p class="mt-2 flex items-center gap-1.5 text-[13px] text-ink-3">
@@ -56,19 +56,23 @@
         </p>
     @endif
 
-    @if ($wilayah || ($musimLabel && $tampilkanMusim))
+    @if ($kuota !== null)
         <div class="mt-3 flex flex-wrap gap-1.5">
-            @if ($wilayah)
-                <span class="inline-flex items-center rounded-full bg-sunken px-2.5 py-1 text-xs font-medium text-ink-2">{{ $wilayah }}</span>
-            @endif
-            @if ($musimLabel && $tampilkanMusim)
-                <span class="inline-flex items-center rounded-full bg-sunken px-2.5 py-1 text-xs font-medium text-ink-2">{{ $musimLabel }}</span>
+            <span class="inline-flex items-center rounded-full bg-accent-soft px-2.5 py-1 text-xs text-ink-2">Kuota{{ $kebutuhan ? ' ' . $kebutuhan : '' }}:<span class="tnum ml-1 font-semibold text-ink">{{ number_format($kuota, 0, ',', '.') }}</span></span>
+            @if ($totalKuota !== null && $totalKuota > $kuota)
+                <span class="inline-flex items-center rounded-full bg-accent-soft px-2.5 py-1 text-xs text-ink-2">Total:<span class="tnum ml-1 font-semibold text-ink">{{ number_format($totalKuota, 0, ',', '.') }}</span></span>
             @endif
         </div>
     @endif
 
+    @if ($musimLabel && $tampilkanMusim)
+        <div class="mt-3 flex flex-wrap gap-1.5">
+            <span class="inline-flex items-center rounded-full bg-sunken px-2.5 py-1 text-xs font-medium text-ink-2">{{ $musimLabel }}</span>
+        </div>
+    @endif
+
     <div class="mt-auto pt-4">
-        <div class="flex items-end justify-between gap-4 border-t border-line pt-3">
+        <div class="border-t border-line pt-3">
             <div class="min-w-0">
                 @if ($badge)
                     <x-ui.badge :variant="$badge[0]">{{ $badge[1] }}</x-ui.badge>
@@ -82,12 +86,6 @@
                     </p>
                 @endif
             </div>
-            @if ($kuota !== null)
-                <div class="shrink-0 text-right">
-                    <p class="text-[11px] font-medium uppercase tracking-wider text-ink-3">Kuota{{ $kebutuhan ? ' ' . $kebutuhan : '' }}</p>
-                    <p class="tnum mt-0.5 text-xl font-bold leading-none text-ink">{{ number_format($kuota, 0, ',', '.') }}</p>
-                </div>
-            @endif
         </div>
     </div>
 </a>

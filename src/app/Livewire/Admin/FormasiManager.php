@@ -29,6 +29,8 @@ class FormasiManager extends Component
 
     public string $saringStatus = '';
 
+    public string $saringPenempatan = '';
+
     /** Pencarian teks nama formasi (jabatan/penempatan/instansi) pada daftar. */
     public string $cariFormasi = '';
 
@@ -56,7 +58,11 @@ class FormasiManager extends Component
 
     public function updated(string $properti): void
     {
-        if (in_array($properti, ['musimId', 'instansiId', 'saringStatus', 'cariFormasi'], true)) {
+        if ($properti === 'musimId') {
+            $this->saringPenempatan = '';
+        }
+
+        if (in_array($properti, ['musimId', 'instansiId', 'saringStatus', 'saringPenempatan', 'cariFormasi'], true)) {
             $this->resetPage();
         }
     }
@@ -89,6 +95,7 @@ class FormasiManager extends Component
         $jumlah = Formasi::query()
             ->where('musim_id', $this->musimId)
             ->when($this->instansiId !== '', fn($q) => $q->where('instansi_id', (int) $this->instansiId))
+            ->when($this->saringPenempatan !== '', fn($q) => $q->where('penempatan', $this->saringPenempatan))
             ->where('status_terbit', 'draft')
             ->update(['status_terbit' => 'terbit']);
         $this->dispatch('toast', tipe: 'sukses', pesan: $jumlah . ' formasi draft diterbitkan.');
@@ -150,7 +157,7 @@ class FormasiManager extends Component
             'sumber' => $this->snapshotSumber !== '' ? $this->snapshotSumber : null,
         ]);
 
-        $this->dispatch('toast', tipe: 'sukses', pesan: 'Snapshot tersimpan untuk ' . $formasi->jabatan . ' (' . $this->snapshotJenis . ').');
+        $this->dispatch('toast', tipe: 'sukses', pesan: 'Snapshot tersimpan untuk ' . $formasi->jabatan . ' — ' . $formasi->penempatan . ' (' . $this->snapshotJenis . ').');
     }
 
     public function render()
@@ -167,16 +174,39 @@ class FormasiManager extends Component
             })
             ->when($this->instansiId !== '', fn($q) => $q->where('instansi_id', (int) $this->instansiId))
             ->when($this->saringStatus !== '', fn($q) => $q->where('status_terbit', $this->saringStatus))
-            ->with(['instansi'])
+            ->when($this->saringPenempatan !== '', fn($q) => $q->where('penempatan', $this->saringPenempatan))
+            ->with(['instansi', 'jurusan' => fn($q) => $q->orderBy('jenjang')->orderBy('nama')])
             ->withSum('kuota as total_kuota', 'jumlah')
             ->withCount('jurusan')
             ->orderBy('jabatan')
             ->paginate(15);
 
+        $penempatanList = Formasi::query()
+            ->where('musim_id', $this->musimId)
+            ->whereNotNull('penempatan')
+            ->where('penempatan', '!=', '')
+            ->distinct()
+            ->orderBy('penempatan')
+            ->pluck('penempatan');
+
         $formasiUntukSnapshot = Formasi::query()
             ->where('musim_id', $this->musimId)
+            ->with(['jurusan' => fn($q) => $q->orderBy('jenjang')->orderBy('nama')])
+            ->withSum('kuota as total_kuota', 'jumlah')
             ->orderBy('jabatan')
-            ->get(['id', 'jabatan', 'penempatan']);
+            ->orderBy('penempatan')
+            ->get();
+
+        $snapshotItems = $formasiUntukSnapshot->map(fn($f) => [
+            'id' => $f->id,
+            'label' => $f->jabatan . ' — ' . $f->penempatan . ' — '
+                . ($f->jurusan->map(fn($j) => $j->jenjang . ' ' . $j->nama)->join(', ') ?: 'tanpa kualifikasi')
+                . ' · Kuota ' . number_format($f->total_kuota ?? 0, 0, ',', '.'),
+        ])->values();
+
+        $labelSnapshotTerpilih = $this->snapshotFormasiId !== ''
+            ? ($snapshotItems->firstWhere('id', (int) $this->snapshotFormasiId)['label'] ?? '')
+            : '';
 
         $snapshotTerbaru = collect();
         if ($this->snapshotFormasiId !== '') {
@@ -192,8 +222,11 @@ class FormasiManager extends Component
             'musimList' => Musim::query()->orderByDesc('tahun')->get(),
             'instansiList' => Instansi::query()->orderBy('nama')->get(),
             'daftar' => $daftar,
+            'penempatanList' => $penempatanList,
             'formasiUntukSnapshot' => $formasiUntukSnapshot,
             'snapshotTerbaru' => $snapshotTerbaru,
+            'snapshotItems' => $snapshotItems,
+            'labelSnapshotTerpilih' => $labelSnapshotTerpilih,
         ]);
     }
 }

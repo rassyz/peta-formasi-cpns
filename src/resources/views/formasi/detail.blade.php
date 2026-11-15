@@ -13,7 +13,6 @@
                 </div>
                 <div class="flex flex-wrap gap-1.5">
                     <x-ui.badge variant="neutral">{{ $formasi->musim->label }} · {{ ucfirst($formasi->musim->status) }}</x-ui.badge>
-                    <x-ui.badge variant="neutral">{{ ucfirst($formasi->instansi->wilayah) }}</x-ui.badge>
                     @if ($terbuka && $formasi->kartu_contoh)
                         <x-ui.badge variant="accent">Contoh — Detail Terbuka</x-ui.badge>
                     @endif

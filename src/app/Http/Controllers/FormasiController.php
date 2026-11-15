@@ -37,7 +37,7 @@ class FormasiController extends Controller
         abort_if($formasi->status_terbit !== 'terbit' && ! $pengguna?->isAdmin(), 404);
 
         $terbuka = (bool) $formasi->kartu_contoh
-            || ($pengguna !== null && $pengguna->punyaAksesMusim($formasi->musim));
+            || ($pengguna !== null && ($pengguna->isAdmin() || $pengguna->punyaAksesMusim($formasi->musim)));
 
         // Cek Kelayakan lebih sempit daripada akses detail: khusus Pass
         // Strategi aktif untuk musim formasi ini (PRD Modul B).

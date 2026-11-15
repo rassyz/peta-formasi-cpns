@@ -21,7 +21,7 @@ use Livewire\WithPagination;
 
 /**
  * Finder formasi (Modul A, FR-A1 s.d. A5). Seluruh fungsi daftar GRATIS:
- * pilih jurusan, pemilih musim, filter instansi/wilayah/jenis kebutuhan/
+ * pilih jurusan, pemilih musim, filter instansi/penempatan/jenis kebutuhan/
  * 0 pelamar, dan sortir peluang/gaji/kuota. Kartu selalu polos — angka
  * pelamar hanya dipakai di server untuk filter & urutan (PRD §5), tidak
  * pernah dirender ke kartu.
@@ -42,9 +42,6 @@ class Finder extends Component
     // akan memaksa '' menjadi 0 pada properti int — 0 tidak boleh berarti filter.
     #[Url]
     public string $instansiId = '';
-
-    #[Url]
-    public string $wilayah = ''; // '' | pusat | daerah
 
     #[Url]
     public string $jenis = ''; // '' | umum | cumlaude | disabilitas | ...
@@ -209,7 +206,6 @@ class Finder extends Component
         $this->kataKunci = '';
         $this->instansiId = '';
         $this->penempatan = '';
-        $this->wilayah = '';
         $this->jenis = '';
         $this->hanyaNolPelamar = false;
         $this->hanyaLolos = false;
@@ -233,7 +229,7 @@ class Finder extends Component
         }
     }
 
-    /** Kondisi "snapshot terakhir pada suatu kuota berisi 0 pelamar MS". */
+    /** Kondisi "snapshot terakhir pada suatu kuota berisi 0 pelamar (total pendaftar)". */
     private function kondisiNolPelamar(Builder $query): void
     {
         $query->whereHas('kuota', function (Builder $q) {
@@ -241,7 +237,7 @@ class Finder extends Component
                 $sub->select(DB::raw(1))
                     ->from('snapshot_pelamar')
                     ->whereColumn('snapshot_pelamar.formasi_kuota_id', 'formasi_kuota.id')
-                    ->where('snapshot_pelamar.jumlah_ms', 0)
+                    ->where('snapshot_pelamar.jumlah_total', 0)
                     ->whereRaw('snapshot_pelamar.tanggal_snapshot = (SELECT MAX(tanggal_snapshot) FROM snapshot_pelamar sp2 WHERE sp2.formasi_kuota_id = formasi_kuota.id)');
             });
         });
@@ -272,10 +268,6 @@ class Finder extends Component
 
         if ($this->penempatan !== '') {
             $query->where('penempatan', $this->penempatan);
-        }
-
-        if ($this->wilayah !== '') {
-            $query->whereHas('instansi', fn(Builder $q) => $q->where('wilayah', $this->wilayah));
         }
 
         if ($this->jenis !== '') {

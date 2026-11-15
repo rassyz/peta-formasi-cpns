@@ -36,7 +36,7 @@ class BerandaController extends Controller
                         $sub->select(DB::raw(1))
                             ->from('snapshot_pelamar')
                             ->whereColumn('snapshot_pelamar.formasi_kuota_id', 'formasi_kuota.id')
-                            ->where('snapshot_pelamar.jumlah_ms', 0)
+                            ->where('snapshot_pelamar.jumlah_total', 0)
                             ->whereRaw('snapshot_pelamar.tanggal_snapshot = (SELECT MAX(tanggal_snapshot) FROM snapshot_pelamar sp2 WHERE sp2.formasi_kuota_id = formasi_kuota.id)');
                     });
                 })
@@ -53,7 +53,7 @@ class BerandaController extends Controller
             ->orderBy('jenjang')
             ->orderBy('nama')
             ->get()
-            ->map(fn (Jurusan $j) => [
+            ->map(fn(Jurusan $j) => [
                 'value' => $j->slug,
                 'label' => $j->nama,
                 'jenjang' => $j->jenjang,
