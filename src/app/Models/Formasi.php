@@ -2,12 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\ChecklistBerkas;
-use App\Models\FormasiKualifikasi;
-use App\Models\FormasiKuota;
-use App\Models\Instansi;
-use App\Models\Jurusan;
-use App\Models\Musim;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,6 +24,7 @@ class Formasi extends Model
         'skl_diterima',
         'syarat_akreditasi',
         'syarat_khusus',
+        'deskripsi_tugas',
         'gaji_min',
         'gaji_maks',
         'sumber_gaji',

@@ -28,10 +28,10 @@
                 <option value="{{ $i->id }}">{{ $i->nama }}</option>
             @endforeach
         </select>
-        <select wire:model.live="saringPenempatan" class="h-10 rounded-lg border border-line-strong bg-surface px-2.5 text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" aria-label="Regional">
-            <option value="">Semua regional</option>
-            @foreach ($penempatanList as $p)
-                <option value="{{ $p }}">{{ $p }}</option>
+        <select wire:model.live="saringPenempatan" class="h-10 max-w-72 rounded-lg border border-line-strong bg-surface px-2.5 text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" aria-label="Unit kerja">
+            <option value="">Semua unit kerja</option>
+            @foreach ($unitList as $u)
+                <option value="{{ $u }}">{{ $u }}</option>
             @endforeach
         </select>
         <select wire:model.live="saringStatus" class="h-10 rounded-lg border border-line-strong bg-surface px-2.5 text-sm focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/30" aria-label="Status">

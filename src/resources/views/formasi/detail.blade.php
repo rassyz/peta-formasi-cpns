@@ -55,6 +55,7 @@
                         'Kualifikasi pendidikan lengkap',
                         'Syarat kunci: usia, IPK, SKL, akreditasi',
                         'Syarat khusus sesuai teks pengumuman',
+                        'Deskripsi tugas jabatan (bila diterbitkan instansi)',
                         'Gaji rinci beserta sumber & tanggal verifikasinya',
                         'Jumlah pelamar rinci & riwayat snapshot',
                         'Checklist berkas formasi ini',
@@ -179,6 +180,15 @@
                             @endforeach
                         </ul>
                     </section>
+
+                    {{-- Deskripsi tugas --}}
+                    @if ($formasi->deskripsi_tugas)
+                        <section class="rounded-2xl border border-line bg-surface p-5 sm:p-6">
+                            <h2 class="text-lg font-semibold tracking-tight">Deskripsi Tugas</h2>
+                            <p class="mt-2.5 whitespace-pre-line text-[15px] leading-7">{{ $formasi->deskripsi_tugas }}</p>
+                            <p class="mt-2 text-[13px] text-ink-2">Ditampilkan apa adanya dari pengumuman instansi.</p>
+                        </section>
+                    @endif
 
                     {{-- Syarat kunci --}}
                     <section class="rounded-2xl border border-line bg-surface p-5 sm:p-6">

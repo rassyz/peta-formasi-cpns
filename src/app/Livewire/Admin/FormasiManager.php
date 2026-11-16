@@ -6,6 +6,7 @@ use App\Livewire\Admin\Concerns\KonfirmasiAksi;
 use App\Models\Formasi;
 use App\Models\Instansi;
 use App\Models\Musim;
+use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
@@ -29,6 +30,7 @@ class FormasiManager extends Component
 
     public string $saringStatus = '';
 
+    /** Saringan unit kerja: segmen pertama penempatan (bagian sebelum " | "). */
     public string $saringPenempatan = '';
 
     /** Pencarian teks nama formasi (jabatan/penempatan/instansi) pada daftar. */
@@ -90,12 +92,28 @@ class FormasiManager extends Component
         $this->dispatch('toast', tipe: 'sukses', pesan: 'Formasi draft dihapus.');
     }
 
+    /**
+     * Terapkan saringan unit kerja ke query formasi: penempatan sama dengan
+     * segmen, atau berada di bawah unit itu (diawali "segmen | "). Pagar
+     * pemisah mencegah unit yang namanya awalan unit lain ikut tertarik.
+     */
+    private function terapkanSaringUnit(Builder $query): void
+    {
+        $segmen = $this->saringPenempatan;
+        $pola = str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $segmen) . ' | %';
+
+        $query->where(function (Builder $sub) use ($segmen, $pola) {
+            $sub->where('penempatan', $segmen)
+                ->orWhere('penempatan', 'like', $pola);
+        });
+    }
+
     public function terbitkanSemuaDraft(): void
     {
         $jumlah = Formasi::query()
             ->where('musim_id', $this->musimId)
             ->when($this->instansiId !== '', fn($q) => $q->where('instansi_id', (int) $this->instansiId))
-            ->when($this->saringPenempatan !== '', fn($q) => $q->where('penempatan', $this->saringPenempatan))
+            ->when($this->saringPenempatan !== '', fn($q) => $this->terapkanSaringUnit($q))
             ->where('status_terbit', 'draft')
             ->update(['status_terbit' => 'terbit']);
         $this->dispatch('toast', tipe: 'sukses', pesan: $jumlah . ' formasi draft diterbitkan.');
@@ -174,20 +192,24 @@ class FormasiManager extends Component
             })
             ->when($this->instansiId !== '', fn($q) => $q->where('instansi_id', (int) $this->instansiId))
             ->when($this->saringStatus !== '', fn($q) => $q->where('status_terbit', $this->saringStatus))
-            ->when($this->saringPenempatan !== '', fn($q) => $q->where('penempatan', $this->saringPenempatan))
+            ->when($this->saringPenempatan !== '', fn($q) => $this->terapkanSaringUnit($q))
             ->with(['instansi', 'jurusan' => fn($q) => $q->orderBy('jenjang')->orderBy('nama')])
             ->withSum('kuota as total_kuota', 'jumlah')
             ->withCount('jurusan')
             ->orderBy('jabatan')
             ->paginate(15);
 
-        $penempatanList = Formasi::query()
+        // Opsi saringan unit kerja: segmen pertama tiap penempatan unik.
+        $unitList = Formasi::query()
             ->where('musim_id', $this->musimId)
             ->whereNotNull('penempatan')
             ->where('penempatan', '!=', '')
             ->distinct()
             ->orderBy('penempatan')
-            ->pluck('penempatan');
+            ->pluck('penempatan')
+            ->map(fn($p) => explode(' | ', $p)[0])
+            ->unique()
+            ->values();
 
         $formasiUntukSnapshot = Formasi::query()
             ->where('musim_id', $this->musimId)
@@ -222,7 +244,7 @@ class FormasiManager extends Component
             'musimList' => Musim::query()->orderByDesc('tahun')->get(),
             'instansiList' => Instansi::query()->orderBy('nama')->get(),
             'daftar' => $daftar,
-            'penempatanList' => $penempatanList,
+            'unitList' => $unitList,
             'formasiUntukSnapshot' => $formasiUntukSnapshot,
             'snapshotTerbaru' => $snapshotTerbaru,
             'snapshotItems' => $snapshotItems,

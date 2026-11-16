@@ -50,6 +50,13 @@
         </div>
     </form>
 
+    {{-- Bilah proses: hanya tampil selama salah satu aksi impor berjalan --}}
+    <div wire:loading wire:target="analisis, tambahJurusanHilang, terapkan"
+        class="mt-6 rounded-2xl border border-accent/40 bg-accent-soft px-5 py-4">
+        <p class="font-semibold text-accent">Proses sedang berjalan…</p>
+        <p class="mt-0.5 text-sm text-ink-2">Berkas berisi ribuan baris bisa memakan waktu 1–3 menit. Jangan tutup atau muat ulang halaman ini.</p>
+    </div>
+
     @if ($laporan)
         {{-- Panel checksum --}}
         @if ($laporan['checksum_ok'] === true)
@@ -70,53 +77,65 @@
         @if ($laporan['jurusan_hilang'] !== [])
             <div class="mt-4 rounded-2xl bg-warning-soft px-5 py-4">
                 <p class="font-semibold text-warning">{{ count($laporan['jurusan_hilang']) }} jurusan belum ada di master:</p>
-                <p class="mt-1 text-sm text-warning">{{ implode(' · ', $laporan['jurusan_hilang']) }}</p>
-                <button type="button" wire:click="tambahJurusanHilang"
-                    class="mt-3 inline-flex h-10 items-center rounded-lg bg-ink px-4 text-sm font-medium text-white transition-colors hover:bg-stone-800">
-                    Tambahkan Semua ke Master &amp; Analisis Ulang
+                <p class="mt-1 text-sm text-warning">{{ implode(' · ', array_slice($laporan['jurusan_hilang'], 0, 30)) }}@if (count($laporan['jurusan_hilang']) > 30) · dan {{ number_format(count($laporan['jurusan_hilang']) - 30, 0, ',', '.') }} lainnya @endif</p>
+                <button type="button" wire:click="tambahJurusanHilang" wire:loading.attr="disabled"
+                    class="mt-3 inline-flex h-10 items-center rounded-lg bg-ink px-4 text-sm font-medium text-white transition-colors hover:bg-stone-800 disabled:opacity-60">
+                    <span wire:loading.remove wire:target="tambahJurusanHilang">Tambahkan Semua ke Master &amp; Analisis Ulang</span>
+                    <span wire:loading wire:target="tambahJurusanHilang">Menambahkan &amp; menganalisis ulang…</span>
                 </button>
             </div>
         @endif
 
-        {{-- Tabel baris --}}
-        <div class="mt-4 overflow-x-auto rounded-2xl border border-line bg-surface">
-            <table class="w-full min-w-170 text-left text-sm">
-                <thead>
-                    <tr class="border-b border-line text-ink-2">
-                        <th class="px-4 py-3 font-medium">Baris</th>
-                        <th class="px-4 py-3 font-medium">Jabatan — Penempatan</th>
-                        <th class="px-4 py-3 font-medium">Kuota</th>
-                        <th class="px-4 py-3 font-medium">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($laporan['baris'] as $baris)
-                        <tr class="border-b border-line align-top last:border-b-0">
-                            <td class="tnum px-4 py-3 text-ink-2">{{ $baris['nomor'] }}</td>
-                            <td class="px-4 py-3">{{ $baris['jabatan'] }} — {{ $baris['penempatan'] }}</td>
-                            <td class="tnum px-4 py-3">{{ number_format($baris['total_kuota'], 0, ',', '.') }}</td>
-                            <td class="px-4 py-3">
-                                @if ($baris['galat'] === [])
-                                    <x-ui.badge variant="success">Siap</x-ui.badge>
-                                @else
+        {{-- Tabel baris: hanya baris bermasalah yang dirender (maks 100) supaya
+             berkas ribuan baris tidak membebani peramban; baris siap cukup diringkas. --}}
+        @if ($laporan['jumlah_bermasalah'] === 0)
+            <div class="mt-4 rounded-2xl border border-line bg-surface px-5 py-4">
+                <p class="font-semibold text-success">Semua {{ number_format($laporan['jumlah_baris'], 0, ',', '.') }} baris siap — tidak ada baris bermasalah.</p>
+            </div>
+        @else
+            @php
+                $bermasalahTampil = array_slice(array_filter($laporan['baris'], fn ($b) => $b['galat'] !== []), 0, 100);
+            @endphp
+            <p class="mt-4 text-sm text-ink-2">
+                Menampilkan {{ number_format(count($bermasalahTampil), 0, ',', '.') }} dari {{ number_format($laporan['jumlah_bermasalah'], 0, ',', '.') }} baris bermasalah
+                · {{ number_format($laporan['jumlah_siap'], 0, ',', '.') }} baris siap tidak ditampilkan.
+            </p>
+            <div class="mt-2 overflow-x-auto rounded-2xl border border-line bg-surface">
+                <table class="w-full min-w-170 text-left text-sm">
+                    <thead>
+                        <tr class="border-b border-line text-ink-2">
+                            <th class="px-4 py-3 font-medium">Baris</th>
+                            <th class="px-4 py-3 font-medium">Jabatan — Penempatan</th>
+                            <th class="px-4 py-3 font-medium">Kuota</th>
+                            <th class="px-4 py-3 font-medium">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($bermasalahTampil as $baris)
+                            <tr class="border-b border-line align-top last:border-b-0">
+                                <td class="tnum px-4 py-3 text-ink-2">{{ $baris['nomor'] }}</td>
+                                <td class="px-4 py-3">{{ $baris['jabatan'] }} — {{ $baris['penempatan'] }}</td>
+                                <td class="tnum px-4 py-3">{{ number_format($baris['total_kuota'], 0, ',', '.') }}</td>
+                                <td class="px-4 py-3">
                                     <x-ui.badge variant="danger">Bermasalah</x-ui.badge>
                                     <ul class="mt-1.5 list-disc space-y-0.5 pl-4 text-[13px] text-danger">
                                         @foreach ($baris['galat'] as $g)
                                             <li>{{ $g }}</li>
                                         @endforeach
                                     </ul>
-                                @endif
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @endif
 
         <div class="mt-4 flex flex-wrap items-center gap-3">
-            <button type="button" wire:click="terapkan" @disabled(! $laporan['valid'])
+            <button type="button" wire:click="terapkan" @disabled(! $laporan['valid']) wire:loading.attr="disabled"
                 class="inline-flex h-11 items-center rounded-lg bg-ink px-5 text-sm font-medium text-white transition-colors hover:bg-stone-800 disabled:cursor-not-allowed disabled:opacity-50">
-                Terapkan {{ $laporan['jumlah_siap'] }} Formasi sebagai Draft
+                <span wire:loading.remove wire:target="terapkan">Terapkan {{ $laporan['jumlah_siap'] }} Formasi sebagai Draft</span>
+                <span wire:loading wire:target="terapkan">Menerapkan…</span>
             </button>
             <p class="text-sm text-ink-2">{{ $laporan['jumlah_siap'] }} dari {{ $laporan['jumlah_baris'] }} baris siap. Penerapan bersifat menyeluruh: semua baris harus siap dan checksum harus cocok — perbaiki berkasnya lalu analisis ulang bila masih ada yang bermasalah.</p>
         </div>
