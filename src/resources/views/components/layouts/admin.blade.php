@@ -20,6 +20,8 @@
              'ikon' => '<path d="M3 22h18"/><path d="M6 18v-7"/><path d="M10 18v-7"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="m12 2-9 5h18l-9-5Z"/>'],
             ['pola' => 'admin.impor', 'url' => route('admin.impor'), 'label' => 'Impor Formasi',
              'ikon' => '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/>'],
+            ['pola' => 'admin.impor-snapshot', 'url' => route('admin.impor-snapshot'), 'label' => 'Impor Snapshot',
+             'ikon' => '<path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/>'],
             ['pola' => 'admin.formasi', 'url' => route('admin.formasi'), 'label' => 'Kelola Formasi',
              'ikon' => '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>'],
             ['pola' => 'admin.kode-akses', 'url' => route('admin.kode-akses'), 'label' => 'Kode Akses',

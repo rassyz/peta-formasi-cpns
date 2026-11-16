@@ -32,6 +32,8 @@ Route::middleware(['auth', 'admin'])
         Route::get('/musim', \App\Livewire\Admin\MusimManager::class)->name('musim');
         Route::get('/pengaturan', \App\Livewire\Admin\PengaturanAkun::class)->name('pengaturan');
         Route::get('/instansi', \App\Livewire\Admin\InstansiManager::class)->name('instansi');
+        Route::livewire('/impor-snapshot', App\Livewire\Admin\ImporSnapshot::class)->name('impor-snapshot');
+        Route::get('/impor-snapshot/template', App\Http\Controllers\Admin\TemplateSnapshotController::class)->name('impor-snapshot.template');
     });
 
 Route::middleware(['auth', 'verified'])->group(function () {

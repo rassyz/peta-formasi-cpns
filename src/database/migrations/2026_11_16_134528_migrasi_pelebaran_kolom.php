@@ -6,13 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Penempatan instansi besar (mis. Pemprov DKI Jakarta) memakai hierarki
-     * panjang — hingga 353 karakter — dan slug gabungan jabatan + penempatan
-     * hingga 402 karakter, melewati VARCHAR(255) awal. Lebarkan keduanya.
-     * Indeks unik (musim_id, slug) tetap aman: 512 karakter utf8mb4 = 2.048
-     * byte, di bawah batas kunci indeks InnoDB 3.072 byte.
-     */
     public function up(): void
     {
         Schema::table('formasi', function (Blueprint $table) {
